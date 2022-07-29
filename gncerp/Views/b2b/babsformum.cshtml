@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "babsformum";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Scripts{
+    fromtipiselect,yilselect,ayselect
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "babsformQuery";
+
+        $(function () {
+            var fromtipiselect="Tüm Tipler";
+            var yilselect="Tüm Yıllar";
+            var ayselect="Tüm Aylar";
+            $("#btnara").click(function () {
+               fromtipiselect= $("#fromtipiselect").val();
+                yilselect= $("#yilselect").val();
+                ayselect = $("#ayselect").val();
+            
+                recordtable.draw();
+            });
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/b2b/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = ["@CurrentSession.Caricodu",fromtipiselect,yilselect,ayselect];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "formtip", class:"text-center"},
+                    { "data": "ay" ,class:"text-center"},
+                    { "data": "yil",class:"text-center" },
+                    { "data": "belgesayisi",class:"text-center" },
+                    { "data": "toplambedel" ,class:"text-center"}
+
+                ]
+
+            });
+
+
+
+        });
+
+        /**/</script>
+
+
+
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title"> BA/BS Formum </h4>
+
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="fromtipiselect">Form Tipi (BA/BS)</label>
+                            <select id="fromtipiselect" class="form-control">
+                                <option>Tüm Tipler</option>
+                                <option>BA</option>
+                                <option>BS</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="yilselect">Bitiş</label>
+                            <select id="yilselect" class="form-control">
+                                <option>Tüm Yıllar</option>
+                                <option>2020</option>
+                                <option>2019</option>
+                                <option>2018</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="ayselect">Ay</label>
+                            <select id="ayselect" class="form-control">
+                                <option>Tüm Aylar</option>
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <option>@item.Value</option>
+                                }
+
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label> Ara</label>
+                            <button class="btn btn-primary form-control" id="btnara"><i class=" fas fa-search"></i> </button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Form Tipi</th>
+                                    <th>Ay </th>
+                                    <th>Yil</th>
+                                    <th>Belge Sayısı </th>
+                                    <th>Toplamb  Bedel</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+

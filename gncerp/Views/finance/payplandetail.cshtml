@@ -1,0 +1,456 @@
+﻿
+@{
+    ViewData["Title"] = "userlist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+
+    dynamic paymode = string.Format(@"SELECT * FROM Paymentmode").GetDynamicQuery();
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "payplanQuery";
+
+        var tip;
+
+        $(function () {
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/appusers/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "paymentmode" },
+                    { "data": "institution" },
+                    {
+                        "data": "startdate", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY");
+                            else
+                                return "";
+                        }
+                    },
+                    {
+                        "data": "enddate", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY");
+                            else
+                                return "";
+                        }
+                    },
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = "<a title='Düzenle' data-id='" + data + "' class='btn btn-sm btn-warning btnedit' data-toggle='tooltip' ><i class='simple-icon-note'></i></a><a   title='Sil' data-toggle='tooltip' data-id='" + data + "' href='javascript:;' class='btn btn-sm btn-danger btnremove'><i class='simple-icon-close'></i></a>";
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            $('#datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+            $("#ekle").click(function () {
+
+                $.confirm({
+                    title: 'Ödeme Planı Ekle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/finance/addPayplan",
+                                    data: JSON.stringify({
+                                        "paymentmodeid": this.$content.find('#paymentmodeid').val(),
+                                        "institution": this.$content.find('#institution').val(),
+                                        "startdate": this.$content.find('#startdate').val(),
+                                        "enddate": this.$content.find('#enddate').val(),
+                                        "day": this.$content.find('#day').val(),
+                                        "bankrate": this.$content.find('#bankrate').val(),
+                                        "creditmainmoney": this.$content.find('#creditmainmoney').val(),
+                                        "creditinterest": this.$content.find('#creditinterest').val(),
+                                        "creditbsmv": this.$content.find('#creditbsmv').val(),
+                                        "continuationrate": this.$content.find('#continuationrate').val(),
+                                        "continuationmainmoney": this.$content.find('#continuationmainmoney').val(),
+                                        "continuationbsmv": this.$content.find('#continuationbsmv').val(),
+                                        "continuationtotal": this.$content.find('#continuationtotal').val(),
+                                        "generaltotal": this.$content.find('#generaltotal').val()
+                                      
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtable.draw();
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+
+                        this.$content.find('#datepicker').datepicker({
+                            format: 'yyyy-mm-dd'
+                            //startDate: '-3d'
+                        });
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Kullanıcı Düzenle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/finance/updateUser",
+                                    data: JSON.stringify({
+                                        "paymentmodeid": this.$content.find('#paymentmodeid').val(),
+                                        "institution": this.$content.find('#institution').val(),
+                                        "startdate": this.$content.find('#startdate').val(),
+                                        "enddate": this.$content.find('#enddate').val(),
+                                        "day": this.$content.find('#day').val(),
+                                        "bankrate": this.$content.find('#bankrate').val(),
+                                        "creditmainmoney": this.$content.find('#creditmainmoney').val(),
+                                        "creditinterest": this.$content.find('#creditinterest').val(),
+                                        "creditbsmv": this.$content.find('#creditbsmv').val(),
+                                        "continuationrate": this.$content.find('#continuationrate').val(),
+                                        "continuationmainmoney": this.$content.find('#continuationmainmoney').val(),
+                                        "continuationbsmv": this.$content.find('#continuationbsmv').val(),
+                                        "continuationtotal": this.$content.find('#continuationtotal').val(),
+                                        "generaltotal": this.$content.find('#generaltotal').val(),
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+                        }
+
+                    },
+                    onContentReady: function () {
+                        this.$content.find('#datepicker').datepicker({
+                            format: 'yyyy-mm-dd'
+                            //startDate: '-3d'
+                        });
+                        var self = this;
+                        $.ajax({
+                            type: "POST",
+                            url: "/finance/getPayplanbyid",
+                            data: JSON.stringify({
+                                "id": id,
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                self.$content.find('#paymentmodeid').val(msg[0].paymentmodeid)
+                                self.$content.find('#institution').val(msg[0].institution)
+                                self.$content.find('#startdate').val(moment(msg[0].startdate).format("YYYY-MM-DD"))
+                                self.$content.find('#enddate').val(moment(msg[0].enddate).format("YYYY-MM-DD"))
+                                self.$content.find('#day').val(msg[0].day)
+                                self.$content.find('#bankrate').val(msg[0].bankrate)
+                                self.$content.find('#creditmainmoney').val(msg[0].creditmainmoney)
+                                self.$content.find('#creditinterest').val(msg[0].creditinterest)
+                                self.$content.find('#creditbsmv').val(msg[0].creditbsmv)
+                                self.$content.find('#continuationrate').val(msg[0].continuationrate)
+                                self.$content.find('#continuationmainmoney').val(msg[0].continuationmainmoney)
+                                self.$content.find('#continuationbsmv').val(msg[0].continuationbsmv)
+                                self.$content.find('#continuationtotal').val(msg[0].continuationtotal)
+                                self.$content.find('#generaltotal').val(msg[0].generaltotal)
+      
+                            }
+                        });
+
+                    }
+                });
+
+            });
+
+
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Emin misiniz!!',
+                    content: '',
+                    autoClose: 'İptal|8000',
+                    buttons: {
+                        deleteUser: {
+                            text: 'Devam Et',
+                            action: function () {
+                                    $.ajax({
+                                    type: "POST",
+                                    url: "/appusers/deleteUser",
+                                    data: JSON.stringify({                     
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            //$.notify("İşlem Başarılı");
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+
+                            }
+                        },
+                        İptal: function () {
+                            
+                            
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+
+        /**/</script>
+
+
+    <script type="text/template" id="formtemplete">
+        <div class="col-md-12 row ">
+            <div class="form-group col-md-6 ">
+                <label>Kurum</label>
+                <input class="form-control " id="institution" />
+            </div>
+
+            <div class="form-group col-md-6">
+
+                <label class="">Ödeme Türü</label>
+                <select class="form-control" id="paymentmodeid">
+                    @foreach (var item in paymode)
+                    {
+                        <option value="@item.id">@item.title</option>
+
+                    }
+
+
+                </select>
+            </div>
+            <div class="form-group col-md-12 p-3">
+                <label>İşlem Tarihi</label>
+                <div class="input-daterange input-group" id="datepicker">
+                    <input type="text" class="input-sm form-control" name="start"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           id="startdate"
+                           placeholder="Start" />
+                    <span class="input-group-addon"></span>
+                    <input type="text" class="input-sm form-control" name="end"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           id="enddate"
+                           placeholder="End" />
+                </div>
+
+
+            </div>
+
+            <div class="form-group col-md-3">
+                <label class="">Gün</label>
+                <input class="form-control" id="day" type="number"  min="0" />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Faiz Oranı 
+                </label>
+                <input class="form-control" id="bankrate" type="number"  min="0"  />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Kredi Anapara 
+                </label>
+                <input class="form-control" id="creditmainmoney" type="number"  min="0"  />
+            </div> 
+
+            <div class="form-group col-md-3">
+                <label class="">
+                    Kredi Faiz 
+                </label>
+                <input class="form-control" id="creditinterest" type="number"  min="0" />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Kredi Bsmv 
+                </label>
+                <input class="form-control" id="creditbsmv" type="number"  min="0"  />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Komisyon Oranı 
+                </label>
+                <input class="form-control" id="continuationrate" type="number"  min="0"  />
+            </div>
+
+            <div class="form-group col-md-3">
+                <label class="">
+                    Komisyon Anapara 
+                </label>
+                <input class="form-control" id="continuationmainmoney" type="number"  min="0"  />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Komisyon Bsmv 
+                </label>
+                <input class="form-control" id="continuationbsmv" type="number"  min="0" />
+            </div>
+            <div class="form-group col-md-3">
+                <label class="">
+                    Komisyon Toplam 
+                </label>
+                <input class="form-control" id="continuationtotal" type="number"  min="0"  />
+            </div> 
+            <div class="form-group col-md-3">
+                <label class="">
+                    Genel Toplam 
+                </label>
+                <input class="form-control" id="generaltotal" type="number"  min="0"  />
+            </div>
+          
+
+        </div>
+    </script>
+
+
+
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Ödeme Planları</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Finas</a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Ödeme Planları </li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="ml-auto mb-3 text-right">
+                        <a class="btn btn-success btn-sm text-white" id="ekle"><i class="simple-icon-plus"></i>&nbsp;Yeni</a>
+                    </div>
+                    <div class="table-responsive">
+
+                        <table id="recordtable" class="table table-sm table-bordered dataTable">
+                            <thead class="">
+                                <tr>
+
+                                    <th>Ödeme Türü  </th>
+                                    <th>Kurum  </th>
+                                    <th>Başlagıç Tarihi </th>
+                                    <th>Bitiş Tarihi  </th>
+                                    <th> </th>
+
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

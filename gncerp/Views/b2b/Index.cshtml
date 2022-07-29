@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "siparislistesiQuery";
+        var _tablename = "Sale";
+        $(function () {
+
+
+
+            $("#sorgulabtn").click(function () {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/admin/helper/generalupdate",
+                    data: JSON.stringify({ "table": tableObj, "id": 0, "tablename": _tablename, "methodsAndParams": [] }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+                        loader.stop();
+                        var jsondata = msg;
+                        if (jsondata.status) {
+                            utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                            recordtable.draw();
+
+                        }
+                        else {
+
+                        }
+
+                    }
+                });
+
+            });
+        });
+                    });
+
+        /**/</script>
+
+}
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">@CurrentSession.Name </h4>
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+    
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body table-responsive">
+
+                    
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+

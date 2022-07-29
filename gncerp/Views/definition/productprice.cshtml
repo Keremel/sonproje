@@ -1,0 +1,373 @@
+﻿@using gncerp.Services
+@model dynamic
+@{
+    ViewData["Title"] = "bayiPerformans";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+    double oran = dbServices.appdefinition().cardrate;
+    dynamic temsilcis = string.Format(@"SELECT [Satış Temsilcisi] temsilci FROM ARY_017_CARI_MUSTER_TEMSILCI GROUP BY [Satış Temsilcisi] ORDER BY [Satış Temsilcisi]").GetDynamicQuery("SCSlogo");
+
+
+}
+<style>
+    table.dataTable td {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+</style>
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "bayiPerformansQuery";
+
+
+        var tip;
+
+
+        $(function () {
+
+
+     
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                $.LoadingOverlay("show");
+                $.ajax({
+                    type: "POST",
+                    url: "/definition/updateProductprice",
+                    data: JSON.stringify({
+                        "MalzRef": id,
+                        "price": $("#" + id + "").val()
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+
+                        if (msg.status) {
+
+                            var obj = JSON.parse(msg.jsonObj)
+                            //$.notify("İşlem Başarılı");
+                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+
+                        } else {
+                            alert(msg.message);
+                        }
+
+                        $.LoadingOverlay("hide");
+
+                    }
+                });
+            });
+
+            $(".dataTable tbody").on("click", "a.btnnameadd", function () {
+                var id = $(this).attr("data-id");
+                var text = $(this).attr("data-text");
+
+                $.confirm({
+                    title: 'Ürün İsim ',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                text = this.$content.find('#fiyatlistname').val();
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/updateProductname",
+                                    data: JSON.stringify({
+                                        "MalzRef": id,
+                                        "fiyatlistname": this.$content.find('#fiyatlistname').val()
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            $('#fiyatlistname-' + id + '').html('' + text + '')
+                                            $('#fiyatlistname-' + id + '').attr("data-text", text);
+                                        } else {
+                                            alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+                        this.$content.find('#fiyatlistname').val(text)
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+                //     $.ajax({
+                //    type: "POST",
+                //    url: "/definition/updateProductprice",
+                //    data: JSON.stringify({
+                //        "MalzRef": id,
+                //        "price": $("#"+id+"").val()
+                //    }),
+                //    contentType: "application/json; charset=utf-8",
+                //    dataType: "json",
+                //    success: function (msg) {
+
+                //        if (msg.status) {
+
+                //            var obj = JSON.parse(msg.jsonObj)
+                //            //$.notify("İşlem Başarılı");
+                //            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+
+                //        } else {
+                //            $.alert(msg.message);
+                //        }
+
+                //          $.LoadingOverlay("hide");
+
+                //    }
+                //});
+            });
+
+            $("#oranupdate").click(function () {
+                var text = $(this).attr("data-text");
+              
+                $.confirm({
+                    title: 'Kredi Kartı Oranı ',
+                    content: $("#formtempleteoran").html(),
+                    columnClass: 'col-md-6',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                var rate = this.$content.find('#oraninput').val();
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/updateRate",
+                                    data: JSON.stringify({
+                                        "rate": rate
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            $('#oranupdate').html('(' + rate + ') Oran');
+                                            $('#oranupdate').attr("data-text", rate);
+
+                                        } else {
+                                            alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+                        this.$content.find('#oraninput').val(text)
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+            $('#recordtable').DataTable({
+                pageLength: 50,
+                paging: true,
+                searching: true,
+                 stateSave: true,
+            });
+
+            $(".dataTable tbody").on("click", "a.btnsearch", function () {
+                var text = $(this).attr("data-text");
+                $('input[type=search]').val(text);
+                $('input[type=search]').keyup();
+                if (marka == '' || marka == null) {
+                    $('.filtre_silici').addClass('hidden');
+                }
+            });
+        });
+
+        /**/</script>
+
+    <script type="text/template" id="formtempleteoran">
+
+        <div class="form-group   text-center">
+            <label class="col-md-2 float-left">Oran</label>
+            <input class="form-control col-md-8" id="oraninput" />
+        </div>
+
+    </script>
+    <script type="text/template" id="formtemplete">
+
+        <div class="form-group">
+            <label class="col-4 float-left">İsim  </label>
+            <input class="form-control col-8 " id="fiyatlistname" />
+        </div>
+
+    </script>
+}
+
+<div class="col-md-12">
+
+    <h1>Ürün Fiyat Güncele </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Tanımlama </a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Ürün Fiyat Güncele </li>
+        </ol>
+    </nav>
+    <div class="float-md-right">
+        @*<a class="btn btn-secondary mr-2 mb-2 text-white" id="oranupdate">Banka Oranı ( @oran )</a>*@
+
+
+
+
+        <a class="btn btn-secondary  mr-2 mb-2  text-white" data-text="@oran" id="oranupdate">(@oran) Oran </a>
+
+    </div>
+</div>
+
+
+
+
+<div class="col-md-12">
+    <div class="card  mb-3">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table id="recordtable" class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+
+                            <th>Marka  </th>
+                            <th>Model  </th>
+                            <th>Specode  </th>
+                            <th>Tür  </th>
+                            <th>FiyatListe İsim</th>
+                            <th>FiyatListe </th>
+                            <th>Son Maliyet </th>
+                            <th>Stok </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    <a class="btn btn-light btnsearch" data-text="@item.marka" data-id="@item.id">@item.marka</a>
+
+                                </td> 
+                                <td>
+                                    <a class="btn btn-light btnsearch" data-text="@item.tip" data-id="@item.id"> @item.tip</a>
+                  
+                              
+                                </td> 
+                                <td>
+                                    <a class="btn btn-light btnsearch" data-text="@item.Specode" data-id="@item.id"> @item.Specode</a>
+                  
+                              
+                                </td>
+                                <td>
+                                   
+                                    <p>@item.model</p>
+                                </td>
+                                <td>
+                                    <a class="btn btn-light btnnameadd" data-text="@item.fiyatlistname" data-id="@item.id" id="fiyatlistname-@item.id">
+
+                                        @if ((object)item.fiyatlistname == DBNull.Value)
+                                        {
+                                            <p>İsim Ekle</p>
+
+                                        }
+                                        else
+                                        {
+                                            <p>@item.fiyatlistname </p>
+                                        }
+                                    </a>
+
+                                </td>
+                                <td>
+                                    <input type="number" class="fiyat text-center" id="@item.id" value="@item.FiyatListe" style="width:80px" />
+                                    <a  data-id="@item.id" class="btn btn-sm btn-secondary btnedit"><i class="simple-icon-note"></i></a>
+                                </td>
+                                <td>
+                                    <p>@item.mal_son </p>
+                                </td>
+                                <td>
+                                    <p>@item.stok </p>
+                                </td>
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

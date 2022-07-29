@@ -1,0 +1,873 @@
+﻿@model fiyatlistesiModel
+@using gncerp.Services
+
+@{
+    ViewData["Title"] = "Şiparişler";
+    Layout = "";
+
+    int takecount = Model.bankIbans.Count() / 2;
+
+    double oran = dbServices.appdefinition().cardrate;
+
+    var groupmodel = Model.fiyatlistesis.GroupBy(r => new { r.markakodu, r.malzemedrupkodu }).Select(x => x.Key);
+
+    List<string> diğermakalar = new List<string>() { "SAMSUNG", "APPLE", "XIAOMI", "HUAWEI", "REALME",  "OPPO", "ELEPHONE", "GENERAL MOBILE", "ALCATEL", "TECNO",  "REEDER", "HTC", "LG", "NEXO", "AUKEY", "HIKING", "QCY", "HYPERGEAR", "MYIME", "LENOVO", "POLOSMART" };
+}
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <title>Gençpa ERP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="~/tema/font/iconsmind-s/css/iconsminds.css" />
+    <link rel="stylesheet" href="~/tema/font/simple-line-icons/css/simple-line-icons.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/bootstrap.rtl.only.min.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/select2.min.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/select2-bootstrap.min.css" />
+    <link rel="stylesheet" href="~/tema/css/vendor/component-custom-switch.min.css" />
+    <link rel="stylesheet" href="~/tema/css/main.css" />
+    <link href="/admin/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-html5-1.6.1/b-print-1.6.1/datatables.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+
+    <link href="~/Toast/css/toast.css" rel="stylesheet" />
+
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        .card-custom {
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
+        }
+
+        .card-custom-img {
+            height: 30px;
+            min-height: 30px;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            border-color: inherit;
+        }
+
+            /* First border-left-width setting is a fallback */
+            .card-custom-img::after {
+                position: absolute;
+                content: '';
+                top: 15px;
+                left: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-top-width: 20px;
+                border-right-width: 0;
+                border-bottom-width: 0;
+                border-left-width: 245px;
+                border-left-width: calc(700px - 5vw);
+                border-top-color: transparent;
+                border-right-color: transparent;
+                border-bottom-color: transparent;
+                border-left-color: inherit;
+            }
+
+        .card-custom-avatar img {
+            position: absolute;
+            top: 5px;
+            left: 1.1rem;
+            width: 90px;
+            height: 90px;
+        }
+    </style>
+</head>
+<body id="app-container" class="menu-sub-hidden show-spinner right-menu">
+
+
+
+    @*menu-hidden*@
+    <div class="col-md-12">
+
+        <h1>Fiyat Listesi </h1>
+        <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+            <ol class="breadcrumb pt-0">
+                <li class="breadcrumb-item">
+                    <a href="#">Satış  </a>
+                </li>
+
+                <li class="breadcrumb-item active" aria-current="page">Fiyat Listesi</li>
+
+
+
+            </ol>
+        </nav>
+
+
+
+
+        <div id="Element"></div>
+    </div>
+    <div class="col-md-12">
+        <div class="float-md-left">
+            <label for="TELEFONU" style="width">
+                TELEFONU
+                <input id="TELEFONU" checked type="checkbox">
+            </label>
+            <label for="TABLET">
+                TABLET
+                <input id="TABLET"  type="checkbox">
+            </label>
+            <label for="AKSESUAR">
+                AKSESUAR
+                <input id="AKSESUAR" type="checkbox">
+            </label>
+
+        </div>
+        <div class="float-md-right">
+            @*<a class="btn btn-secondary mr-2 mb-2 text-white" id="oranupdate">Banka Oranı ( @oran )</a>*@
+
+
+
+            <label for="usernamebtn">
+                Kullanıcı Bilgileri
+                <input id="usernamebtn" checked type="checkbox">
+            </label>
+            @if (CurrentSession.identity.username() == "BARIŞ ÖZCAN")
+            {
+                <a class="btn btn-secondary mr-2 mb-2 text-white" href="/definition/productprice">Fiyatları Güncele </a>
+            }
+
+            <a class="btn btn-secondary mr-2 mb-2 text-white" id="ekleimg">Kampanya Resim Ekle <i class="simple-icon-picture"></i></a>
+            <a class="btn btn-secondary  mr-2 mb-2 text-white" id="ekletext">Kampanya Text Ekle <i class="simple-icon-list"></i> </a>
+            <a class="btn btn-secondary  mr-2 mb-2  text-white" id="htmltojpgbtn">Resim Dosyası Oluştur </a>
+
+        </div>
+    </div>
+
+    <div id="printable" class="price_table col-md-12 row" style="background:#ffffff  ">
+
+        <div class="col-md-12 row card mb-3" style="margin-left:auto;margin-right:auto;margin-top:10px">
+            <div class="col-md-12 row">
+
+                <div class="col-md-4 text-center"><img src="~/Untitled-1 (1).jpg" style="padding-top:10px;height:150px"></div>
+                <div class="col-md-4 text-center bold" style="margin-top:5px;font-size:25px">
+                    <b>FİYAT LİSTESİ</b><br><b>
+
+                        @DateTime.Now.Day @Helpertype.Aylar.FirstOrDefault(x => x.Key == DateTime.Now.Month).Value   @DateTime.Now.Year
+                    </b>
+                </div>
+                <div class="col-md-4 text-right" style="font-weight: bold;font-size:15px;margin-top:10px">
+
+                    <b> <i class="simple-icon-location-pin"></i> Merkez:</b>  Trump Towers Residence Kuştepe, Mecidiyeköy Yolu Cd. No:12 /1601 Şişli/İstanbul  <br>
+                    <div class="separator mb-1"></div>
+                    <b>                                                                                                                          <i class="simple-icon-location-pin"></i>                                                                                                          Lojistik :                                                                                                                                </b>  Gülbahar Mah Cemal Sahir Sok No 29 D:23
+                    Polat İş merkezi Mecidiyeköy / İstanbul<br>
+
+                </div>
+                <div class="col-md-6 text-center">
+                    <h6>
+                        <i class="iconsminds-mail-forward"></i> : <b>info@gencpa.com</b> | <i class="iconsminds-cursor"></i> : <b>gencpa.com</b>
+                        <i class="iconsminds-smartphone-4"></i> : <b>(0212) 432 22 22</b>
+
+                    </h6>
+                </div>
+                <div class="col-md-6 text-center">
+                    <h6 class="username">
+                        <i class="iconsminds-male-female"></i> : <b>@CurrentSession.identity.username()</b> | <i class="iconsminds-mail-forward"></i> : <b>@CurrentSession.identity.Email()</b>
+                        <i class="iconsminds-smartphone-4"></i> : <b>@CurrentSession.identity.Tel()</b>
+
+                    </h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card-columns    row" id="cardlist"></div>
+
+            <div class="card-columns sortable     ">
+
+                @foreach (var m in diğermakalar)
+                {
+
+  
+                @foreach (var a in groupmodel.Where(x => !x.malzemedrupkodu.Contains("TABLE") && x.markakodu.Contains(m)))
+                {
+                    @*@if (diğermakalar.Contains(a.markakodu))
+                    {
+                    }*@
+                        <div class="card card-custom      @a.malzemedrupkodu">
+
+                            @*<div class="card-custom-img" style="background-image: url(/img/trianglify-v1-cs85g_cc5d2i.jpg);"></div>*@
+
+
+                            <div class="card-body  " style="margin-top:-10px">
+                                <h4 class="text-center" style="color:black;font-weight: bold;">
+                                    <img onerror="imgError(this);" src="~/img/fiyatlistesiimg/@(a.markakodu).png" style="width:100%;height:100%" />
+                                </h4>
+
+
+                                <table class="table table-striped " width="100%">
+
+                                    <tbody>
+
+                                        <tr style="font-weight: bold;padding:.35rem;color:red">
+
+                                            <td style="padding: .1rem;">
+                                                <span class=" text-left" style="font-weight: bold; font-size: 14px"> @a.markakodu   @a.malzemedrupkodu</span>
+                                            </td>
+                                            <td style="width:80px ;padding: .1rem;font-size:5px">
+                                                <span style=" font-weight: bold ;font-size: 15px" class="float-right">Nakit (₺)</span>
+                                            </td>
+                                            @if (oran != 0)
+                                            {
+                                                <td style="width:80px ;padding: .1rem;font-size:15px">
+                                                    <span style="font-weight: bold; font-size: 15px" class="float-right">K.Kart (₺)</span>
+                                                </td>
+                                            }
+
+                                        </tr>
+                                        @foreach (var item in Model.fiyatlistesis.Where(x => x.markakodu.Contains(a.markakodu) && x.malzemedrupkodu.Contains(a.malzemedrupkodu)).OrderBy(s => s.firstchart).ThenBy(s => s.fiyatlist).ThenBy(s => s.malzemeadi).ToList())
+                                        {
+                                            <tr style="padding:.35rem;">
+
+                                                <td style="font-weight: 800; padding: .1rem; font-size:16px">
+                                                    @if (item.fiyatlistname.isNull())
+                                                    {
+                                                        @item.malzemeadi
+                                                    }
+                                                    else
+                                                    {
+                                                        @item.fiyatlistname
+                                                    }
+                                                </td>
+
+                                                <td style=" width: 70px; padding: .1rem; font-size:16px">
+                                                    <span style="font-weight: 800;" class="float-right">@string.Format("{0:#,0}", item.fiyatlist)</span>
+                                                </td>
+                                                @if (oran != 0)
+                                                {
+                                                    <td style="font-weight: 800; width: 70px; padding: .1rem; font-size:16px">
+                                                        <span style="font-weight: 800;" class="float-right">@string.Format("{0:#,0}", (Decimal.ToDouble(item.fiyatlist) + (Decimal.ToDouble(item.fiyatlist) * oran / 100)))</span>
+                                                    </td>
+                                                }
+                                            </tr>
+
+                                        }
+
+
+                                    </tbody>
+                                </table>
+
+
+
+                            </div>
+                        </div>
+
+                    
+
+
+
+
+                }
+                }
+
+             
+
+                <div class="card  card-custom bg-white border-white border-0 AKSESUAR ">
+
+                    @*<div class="card-custom-img" style="background-image: url(http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg);"></div>*@
+
+
+                    <div class="card-body " style="margin-top:-10px">
+                        <h4 class="text-center" style="color:black;font-weight: bold;">
+                            DİĞER MARKALAR
+                        </h4>
+
+
+                        <table class="table table-striped " width="100%">
+
+                            <tbody>
+
+                                <tr style="font-weight: bold;padding:.35rem;color:red">
+
+                                    <td style="padding: .1rem;">
+                                        <span style="font-weight: bold; font-size: 15px" class=" text-left"> AKSESUAR </span>
+                                    </td>
+                                    <td style="width:80px ;padding: .1rem;font-size:15px">
+                                        <span style="font-weight: bold; font-size: 15px" class="float-right">Nakit (₺)</span>
+                                    </td>
+                                    @if (oran != 0)
+                                    {
+                                        <td style="width:80px ;padding: .1rem;font-size:15px">
+                                            <span style="font-weight: bold; font-size: 15px" class="float-right">K.Kart (₺)</span>
+                                        </td>
+                                    }
+                                </tr>
+                                @foreach (var a in groupmodel.Where(x => x.malzemedrupkodu.Contains("AKSESUAR")))
+                                {
+                                    @if (!diğermakalar.Contains(a.markakodu))
+                                    {
+
+                                        @foreach (var item in Model.fiyatlistesis.Where(x => x.markakodu.Contains(a.markakodu)).OrderBy(s => s.firstchart).ThenBy(s => s.fiyatlist).ThenBy(s => s.fiyatlistname).ToList())
+                                        {
+                                            <tr>
+
+                                                <td style="font-weight: 800; padding: .1rem; font-size: 16px">
+                                                    <span class=" text-left">
+                                                        @if (item.fiyatlistname.isNull())
+                                                        {
+                                                            @item.malzemeadi
+                                                        }
+                                                        else
+                                                        {
+                                                            @item.fiyatlistname
+                                                        }
+
+                                                    </span>
+                                                </td>
+                                                <td style="font-weight: 800; width: 70px; padding: .1rem; font-size: 2px">
+                                                    <p class="float-right">@string.Format("{0:00}", item.fiyatlist)</p>
+                                                </td>
+
+                                                @if (oran != 0)
+                                                {
+                                                    <td style="font-weight: 800; width: 70px; padding: .1rem; font-size: 16px">
+                                                        <p class="float-right">@string.Format("{0:00}", (Decimal.ToDouble(item.fiyatlist) + (Decimal.ToDouble(item.fiyatlist) * oran / 100)))</p>
+                                                    </td>
+                                                }
+                                            </tr>
+
+                                        }
+                                    }
+                                }
+
+
+
+                            </tbody>
+                        </table>
+
+
+
+                    </div>
+                </div>
+
+
+                @if (Model.fiyatlistesis.Where(x => x.malzemedrupkodu.Contains("TABLET")).ToList().Count != 0)
+                {
+                    <div class="card  card-custom bg-white border-white border-0 TABLET ">
+
+                        @*<div class="card-custom-img" style="background-image: url(http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg);"></div>*@
+
+
+                        <div class="card-body " style="margin-top:-10px">
+                            <h4 class="text-center" style="color:black;font-weight: bold;">
+                                TABLET
+                            </h4>
+
+
+                            <table class="table table-striped " width="100%">
+
+                                <tbody>
+
+                                    <tr style="font-weight: bold;padding:.35rem;color:red">
+
+                                        <td style="padding: .1rem;">
+                                            <span style="font-weight: bold; font-size: 15px" class=" text-left">TABLET </span>
+                                        </td>
+                                        <td style="width:80px ;padding: .1rem;font-size:15px">
+                                            <span style="font-weight: bold; font-size: 15px" class="float-right">Nakit (₺)</span>
+                                        </td>
+                                        @if (oran != 0)
+                                        {
+                                            <td style="width:80px ;padding: .1rem;font-size:15px">
+                                                <span style="font-weight: bold; font-size: 15px" class="float-right">K.Kart (₺)</span>
+                                            </td>
+                                        }
+                                    </tr>
+
+
+                                    @foreach (var item in Model.fiyatlistesis.Where(x => x.malzemedrupkodu.Contains("TABLET")).OrderBy(s => s.firstchart).ThenBy(s => s.fiyatlist).ThenBy(s => s.fiyatlistname).ToList())
+                                    {
+                                        <tr>
+
+                                            <td style="font-weight: 800; padding: .1rem; font-size:16px">
+                                                <span class=" text-left">
+                                                    @if (item.fiyatlistname.isNull())
+                                                    {
+                                                        @item.malzemeadi
+                                                    }
+                                                    else
+                                                    {
+                                                        @item.fiyatlistname
+                                                    }
+
+                                                </span>
+                                            </td>
+                                            <td style="font-weight: 800; width: 70px; padding: .1rem; font-size: 2px">
+                                                <p class="float-right">@string.Format("{0:0}", item.fiyatlist)</p>
+                                            </td>
+
+                                            @if (oran != 0)
+                                            {
+                                                <td style="font-weight: 800; width: 70px; padding: .1rem; font-size:16px">
+                                                    <p class="float-right">@string.Format("{0:C0}", (Decimal.ToDouble(item.fiyatlist) + (Decimal.ToDouble(item.fiyatlist) * oran / 100)))</p>
+                                                </td>
+                                            }
+                                        </tr>
+
+                                    }
+
+
+
+
+                                </tbody>
+                            </table>
+
+
+
+                        </div>
+                    </div>
+
+                }
+
+
+            </div>
+
+
+        </div>
+        <div class="col-md-12 row card mb-3" style="margin-left: auto;
+        margin-right: auto;
+                                                        margin-bottom: 20px">
+            <div class="col-md-12 row">
+
+                <div class="col-md-12 text-center ">
+
+
+                    <h1 class="text-center"> GENÇPA Teknoloji Banka Hesap Bilgileri </h1>
+
+                </div>
+
+
+                <div class="col-md-6 text-center bold" style="margin-top:5px;font-size:25px">
+
+                    <table class="table table-striped " width="100%">
+
+
+                        <tbody>
+
+
+                            <tr style="font-weight: bold;padding:.35rem">
+
+
+                                <td>
+
+                                    <span class=" text-left"> Banka </span>
+
+                                </td>
+
+                                <td style="font-size:15px">
+                                    IBAN
+                                </td>
+                                @*<td style="font-size:15px">
+                                       Hesap Numarası
+                                    </td>
+                                    <td style="font-size:15px">
+                                       Şube Kodu
+                                    </td>*@
+
+                            </tr>
+                            @foreach (var item in Model.bankIbans.Take(5))
+                            {
+
+                                <tr style="font-weight: bold;padding:.35rem;">
+
+                                    <td style="padding: .1rem;">
+                                        <img src="/img/bank/@item.id/spot.jpg?" onerror="this.src='/client/img/advance_feature_img.jpg'" style="width:80px;" class="avatar special_img" alt=" ">
+
+                                    </td>
+                                    <td>
+                                        <p class=""> @item.iban</p>
+                                    </td>
+                                    @*<td >
+                                            <p class=""> @item.accountno</p>
+                                        </td>    <td >
+                                            <p class=""> @item.subecodu</p>
+                                        </td>*@
+                                </tr>
+
+
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6 text-center bold" style="margin-top:5px;font-size:25px">
+                    <table class="table table-striped " width="100%">
+
+                        <tbody>
+
+                            <tr style="font-weight: bold;padding:.35rem">
+
+                                <td>
+                                    <span class=" text-left"> Banka </span>
+                                </td>
+                                <td style="font-size:15px">
+                                    IBAN
+                                </td>
+                                @*<td style="font-size:15px">
+                                       Hesap Numarası
+                                    </td>
+                                    <td style="font-size:15px">
+                                       Şube Kodu
+                                    </td>*@
+
+                            </tr>
+                            @foreach (var item in Model.bankIbans.TakeLast(5))
+                            {
+
+                                <tr style="font-weight: bold;padding:.35rem;">
+
+                                    <td style="padding: .1rem;">
+                                        <img src="/img/bank/@item.id/spot.jpg?" onerror="this.src='/client/img/advance_feature_img.jpg'" style="width:80px;" class="avatar special_img" alt=" ">
+
+                                    </td>
+                                    <td>
+                                        <p class=""> @item.iban</p>
+                                    </td>
+                                    @*<td >
+                                            <p class=""> @item.accountno</p>
+                                        </td>    <td >
+                                            <p class=""> @item.subecodu</p>
+                                        </td>*@
+                                </tr>
+
+
+                            }
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-12 " id="downloaddiv" style="display:none">
+        <div class="card text-center ">
+            <a>
+                <img id="downloadimg" style="height:500px;width:600px" src="" />
+            </a>
+
+            <a href="" download="Gençpa Fiyat Listesi" id="downloada" class="btn btn-warning">
+                indir
+            </a>
+
+        </div>
+    </div>
+
+
+    <script src="~/tema/js/vendor/jquery-3.3.1.min.js"></script>
+    <script src="~/tema/js/vendor/bootstrap.bundle.min.js"></script>
+    <script src="~/tema/js/vendor/moment.min.js"></script>
+    <script src="~/tema/js/vendor/fullcalendar.min.js"></script>
+    <script src="~/tema/js/vendor/perfect-scrollbar.min.js"></script>
+    <script src="~/tema/js/vendor/bootstrap-notify.min.js"></script>
+    <script src="~/tema/js/vendor/select2.full.js"></script>
+    <script src="~/tema/js/vendor/bootstrap-datepicker.js"></script>
+    <script src="~/tema/js/vendor/Sortable.js"></script>
+    <script src="~/tema/js/vendor/bootstrap-tagsinput.min.js"></script>
+    <script src="~/tema/js/vendor/nouislider.min.js"></script>
+    <script src="~/tema/js/vendor/jquery.barrating.min.js"></script>
+    <script src="~/tema/js/vendor/cropper.min.js"></script>
+    <script src="~/tema/js/vendor/typeahead.bundle.js"></script>
+    <script src="~/tema/js/vendor/mousetrap.min.js"></script>
+    <script src="~/tema/js/dore-plugins/select.from.library.js"></script>
+    <script src="~/tema/js/vendor/dropzone.min.js"></script>
+    <script src="~/tema/js/dore.script.js"></script>
+
+
+    <script src="/admin/assets/libs/moment/min/moment-with-locales.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-html5-1.6.1/b-print-1.6.1/datatables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="~/Toast/js/toast.js"></script>
+  
+    <script src="~/tema/js/scripts.js"></script>
+
+    <script>
+        $('a').attr('target', '_blank');
+    </script>
+
+
+
+
+        <script src="~/tema/js/vendor/ckeditor5-build-classic/ckeditor.js"></script>
+        <script src="~/tema/js/html2canvas/html2canvas.min.js"></script>
+
+        <script type="text/javascript">
+            var srcimg;
+            function showpreview(e) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    srcimg = e.target.result;
+
+                }
+                //Imagepath.files[0] is blob type
+                reader.readAsDataURL(e.files[0]);
+            }
+            $(function () {
+
+
+                $("body").addClass("menu-hidden");
+
+
+                $(".AKSESUAR").hide();
+                $(".TABLET").hide();
+
+                $('#usernamebtn').change(function () {
+
+                    if ($(this).is(':checked')) {
+                        $(".username").show();
+                    }
+                    else {
+                        $(".username").hide();
+                    }
+
+                });
+                $('#AKSESUAR').change(function () {
+
+                    if ($(this).is(':checked')) {
+                        $(".AKSESUAR").show();
+                    }
+                    else {
+                        $(".AKSESUAR").hide();
+                    }
+
+                });
+                $('#TELEFONU ').change(function () {
+
+                    if ($(this).is(':checked')) {
+                        $(".TELEFONU ").show();
+                    }
+                    else {
+                        $(".TELEFONU ").hide();
+                    }
+
+                });
+                $('#TABLET').change(function () {
+
+                    if ($(this).is(':checked')) {
+                        $(".TABLET").show();
+                    }
+                    else {
+                        $(".TABLET").hide();
+                    }
+
+                });
+                $("body").addClass("menu-hidden");
+
+                $("#htmltojpgbtn").click(function () {
+
+                    $.LoadingOverlay("show");
+
+                    var bigCanvas = jQuery("#printable"); // This will be the 3x sized canvas we're going to render
+
+
+                    var scaleBy = 5;
+                    var w = 2000;
+                    var h = 2000;
+
+
+                    html2canvas(bigCanvas,
+                        {
+                            scale: 4,
+                            useCORS: true, //By passing this option in function Cross origin images will be rendered properly in the downloaded version of the PDF
+                            dpi: 144,
+                            onrendered: function (canvas) {
+
+                                var imgageData = canvas.toDataURL("image/jpg");
+                                // Now browser starts downloading it instead of just showing it
+                                var newData = imgageData.replace(/^data:image\/jpg/, "data:application/octet-stream");
+
+                                $("#downloadimg").attr("src", imgageData);
+                                $("#downloada").attr("href", imgageData);
+                                $('html,body').animate({ scrollTop: $(document).height() + 1600 }, 'fast');
+
+                                $.LoadingOverlay("hide");
+                                $("#downloaddiv").show();
+
+
+                            }
+                        });
+
+
+                });
+                $(".kampanya").click(function () {
+
+                    $(this).remove();
+
+                });
+
+                $("#ekletext").click(function () {
+
+
+                    $.confirm({
+                        title: 'Kampanya Ekle',
+                        content: $("#formtempletetext").html(),
+                        columnClass: 'col-md-8',
+                        containerFluid: true,
+                        buttons: {
+                            formSubmit: {
+                                text: 'Ekle',
+                                btnClass: 'btn-blue',
+                                action: function () {
+
+
+
+                                    kampanytextaadd(this.$content.find('#title').val(), this.$content.find('#ckEditorClassic').val())
+                                }
+                            },
+                            formClose: {
+                                text: 'Kapat',
+                                btnClass: 'btn-blue'
+
+                            }
+
+                        },
+
+                        onOpen: function () {
+
+
+                        },
+                        onContentReady: function () {
+
+
+                            var jc = this;
+                            this.$content.find('form').on('submit', function (e) {
+                                e.preventDefault();
+                                jc.$$formSubmit.trigger('click'); // reference the button and click it
+                            });
+                        }
+                    });
+
+                });
+                $("#ekleimg").click(function () {
+
+
+                    $.confirm({
+                        title: 'Kampanya Ekle',
+                        content: $("#formtempleteimg").html(),
+                        columnClass: 'col-md-8',
+                        containerFluid: true,
+                        buttons: {
+                            formSubmit: {
+                                text: 'Ekle',
+                                btnClass: 'btn-blue',
+                                action: function () {
+
+
+                                    kampanyimgaadd(srcimg)
+                                }
+                            },
+                            formClose: {
+                                text: 'Kapat',
+                                btnClass: 'btn-blue'
+
+                            }
+
+                        },
+
+                        onOpen: function () {
+
+
+                        },
+                        onContentReady: function () {
+
+
+                            var jc = this;
+                            this.$content.find('form').on('submit', function (e) {
+                                e.preventDefault();
+                                jc.$$formSubmit.trigger('click'); // reference the button and click it
+                            });
+                        }
+                    });
+
+                });
+
+
+                function kampanytextaadd(title, info) {
+                    var htmlcard = "<div class='card  card-custom bg-white border-white border-0  card kampanya'>"
+                        + " <div class='card-custom-img ' style='background-image: url(/img/kampanyaimg.jpg);'></div>"
+                        + "<div class='card-body' style='margin-top:-15px'>"
+                        + "<h4 class='text-center' style='color:#04c;font-weight: bold;'>  " + title + " </h4>"
+                        + "<p>" + info + " </p>    </div>  </div>";
+                    $("#cardlist").prepend(htmlcard);
+                }
+
+                function kampanyimgaadd(img) {
+                    var htmlcard = "<div class='card  card-custom bg-white border-white border-0  card kampanya '>"
+                        + " <div class='card-custom-img' style='background-image: url(/img/kampanyaimg.jpg);'></div>"
+                        + "<div class='card-body'style='margin-top:-15px'>"
+                        + "<h4 class='text-center' style='color:#04c;font-weight: bold;'></h4>"
+                        + "<p><img src='" + img + "'  style='width:100%;height:100%' /> </p>    </div>  </div>";
+                    $("#cardlist").prepend(htmlcard);
+                }
+
+
+            });
+
+        </script>
+
+        <script type="text/template" id="formtempletetext">
+
+            <div class="form-group">
+                <label class=" ">Başlık</label>
+                <input class="form-control  " id="title" />
+            </div>
+            <div class="form-group">
+                <label class=" float-left">Açıklama</label>
+                <textarea class="form-control  " name="content" id="ckEditorClassic"></textarea>
+            </div>
+
+        </script>
+
+        <script type="text/template" id="formtempleteoran">
+
+            <div class="form-group   text-center">
+                <label class="col-md-2 float-left">Oran</label>
+                <input class="form-control col-md-8" id="oraninput" />
+            </div>
+
+        </script>
+
+        <script type="text/template" id="formtempleteimg">
+
+            <div class="form-group">
+                <label class="col-4 float-left">Resim</label>
+                <input type="file" name="fileupload" value="fileupload" id="fileupload" onchange='showpreview(this)' accept="image/jpeg">
+            </div>
+
+        </script>
+
+
+
+</body>
+
+
+</html>

@@ -1,0 +1,221 @@
+﻿
+@model List<pazaryeriraporModel>
+@{
+    ViewData["Title"] = "bayiPerformans";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+}
+
+@section Scripts{
+
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "bayiPerformansQuery";
+
+
+        var tip;
+
+
+        $(function () {
+
+
+            $("#btnara").click(function () {
+                bastarih = $("#bastarih").val();
+                bistarih = $("#bistarih").val();
+
+                window.location.href = "/salerapor/pazaryerirapor?bastarih=" + bastarih + "&bistarih=" + bistarih;
+            });
+            var indexLastColumn = $("#recordtable").find('tr')[0].cells.length - 1;
+            $('#recordtable').DataTable({
+                "pageLength": 25,
+                "paging": true,
+                "searching": true,
+                "order": [[indexLastColumn, 'asc']]
+            });
+
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+        });
+
+        /**/</script>
+
+
+    <script type="text/template" id="formtemplete">
+
+        <div class="form-group">
+            <label class="col-4 float-left">Şube Adı</label>
+            <input class="form-control col-8 notnull" data-table="dealers" data-column="title" data-type="string" data-maxlength="250" />
+        </div>
+        <div class="form-group">
+            <label class="col-4 float-left">Aktif</label>
+            <input type="checkbox" class="form-control col-8" data-table="dealers" data-column="status" data-type="int" />
+        </div>
+    </script>
+}
+
+<div class="col-md-12">
+
+    <h1>Pazaryeri Raporu   </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Sipariş Raporlar </a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Pazaryeri Raporu </li>
+        </ol>
+    </nav>
+    
+</div>
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="form-row">
+
+
+                    <div class="form-group col-md-4 p-3">
+                        <label>İşlem Tarihi</label>
+                        <div class="input-daterange input-group" id="datepicker">
+                            <input type="text" class="input-sm form-control" name="start"
+                                   value="@firstDayOfMonth.ToString("yyyy-MM-dd")"
+                                   id="bastarih"
+                                   placeholder="Start" />
+                            <span class="input-group-addon"></span>
+                            <input type="text" class="input-sm form-control" name="end"
+                                   value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                   id="bistarih"
+                                   placeholder="End" />
+                        </div>
+
+
+                    </div>
+  
+
+
+
+                    <div class="form-group col-md-2 p-3">
+                        <label> Ara</label>
+                        <button class="btn btn-warning form-control" id="btnara"><i class="simple-icon-magic-wand"></i> </button>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card  mb-3">
+
+            <div class="card-body">
+
+
+                <div class="table-responsive">
+
+                    <table id="recordtable" class=" recordtable table table-sm table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+
+                                <th>Pazaryeri</th>
+                                <th>Adet </th>
+                                <th>Çeşit  </th>
+                                <th>Marka </th>
+                                <th>Kar  </th>
+                                <th>Ciro  </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+
+                            <tr>
+                                <td>
+                                    <p>
+                                        @item.pazaryeri
+                                    </p>
+                                </td>
+
+
+                                <td>
+                                    <p>
+                                        @item.cesit
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>
+                                        @item.marka
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>
+                                        @item.adet
+                                    </p>
+
+                                </td>
+                                <td>
+                                    <p>
+                                        @string.Format("{0:#,0}", item.kar)
+
+                                    </p>
+                                </td>
+                                <td>
+
+                                    <p>
+
+
+                                        @string.Format("{0:#,0}", item.ciro)
+
+
+                                    </p>
+                                </td>
+
+                            </tr>
+
+                            }
+                        <tr style="font-weight:900;color:forestgreen;background-color:#f3f3f3" class="isgenel">
+                            <td>
+                                Topalam
+                            </td>
+                            <td>
+                            </td>
+                           <td>
+                            </td>     
+                           <td>
+                               <h3>
+                                   @string.Format("{0:00}", Model.Sum(a => a.adet))
+
+                               </h3>
+                           </td>
+                     
+                            <td>
+                                <h3>
+                                    @string.Format("{0:C0}", Model.Sum(a => a.kar))
+
+                                </h3>
+                            </td>
+                            <td>
+                                <h3>
+                                    @string.Format("{0:C0}", Model.Sum(a => a.ciro))
+
+                                </h3>
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

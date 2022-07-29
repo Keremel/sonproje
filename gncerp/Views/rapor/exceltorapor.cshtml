@@ -1,0 +1,300 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = "exceltorapor";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    double toplempersonel = 0;
+    double toplemtasit = 0;
+    double toplempos = 0;
+    int aysayisi = 12;
+    int aysayisi1 = 12;
+    int aysayisi2 = 12;
+}
+@section Scripts{
+    <script type="text/javascript">
+
+
+        var yil = 2020;
+        var ay = 5;
+        var code = 760;
+
+        var _defaulttablename = "rapordetayQuery";
+
+        $(function () {
+
+            $('.btnmodel').on('click', function () {
+
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnara", function () {
+                yil = $(this).attr("data-yil");
+                ay = $(this).attr("data-ay");
+                code = $(this).attr("data-code");
+
+
+                $.confirm({
+                    columnClass: 'col-md-12',
+                    title: $(this).attr("data-title"),
+                    content: $("#tabletemplete").html(),
+                    buttons: {
+                        close: {
+                            text: 'Kapat', // With spaces and symbols
+                            action: function () {
+
+                            }
+                        }
+                    },
+                    onContentReady: function () {
+                        getdatetable();
+                    }
+                });
+
+
+
+            });
+
+            function getdatetable() {
+                recordtable = $('#recordtable').DataTable({
+                    "serverSide": true,
+                    //"jQueryUI": true,
+                    "stateSave": false,
+                    "pagingType": "full_numbers",
+                    "ajax": {
+                        "url": "/api/datatables",
+                        "type": "POST",
+                        "contentType": "application/json; charset=utf-8",
+                        "data": function (d) {
+                            d.dataqueryname = _defaulttablename;
+                            d.additionalvalues = [code, yil, ay];
+                            return JSON.stringify(d);
+                        }
+                    },
+                    "columns": [
+                        { "data": "tanim" },
+                        {
+                            "data": "tarih", className: "text-center", "render": function (data, type, row) {
+                                if (data != null && data != "")
+                                    return moment(data).format("DD.MM.YYYY HH:mm");
+                                else
+                                    return "";
+                            }
+                        },
+                        { "data": "toplam" },
+
+                    ]
+
+                });
+            }
+        })
+
+
+    </script>
+    <script type="text/template" id="tabletemplete">
+
+
+        <div class="table-responsive">
+            <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                <thead>
+                    <tr>
+                        <th>Ay </th>
+                        <th>Tarih</th>
+                        <th>Toplam </th>
+
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </script>
+}
+
+<style>
+    table {
+        /* make the border continuous (without gaps between columns) */
+        border-collapse: collapse;
+    }
+</style>
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Gelir Gider Raporu</h4>
+            <div class="ml-auto text-right">
+                @*<h5>Yeni Şiparişler</h5>*@
+                @*<a href="javascript:;" class="btn btn-success "><i class="fas fa-retweet"></i>&nbsp;Yeni Şipariş Getir</a>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm table-striped table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"># Giderler </th>
+                                <th scope="col">Ocak</th>
+                                <th scope="col">Şubat</th>
+                                <th scope="col">Mart</th>
+                                <th scope="col">Nisan</th>
+                                <th scope="col">Mayıs</th>
+                                <th scope="col">Haziran</th>
+                                <th scope="col">Termüz</th>
+                                <th scope="col">Ağust</th>
+                                <th scope="col">Ekim</th>
+                                <th scope="col">Eylül</th>
+                                <th scope="col">Kasım</th>
+                                <th scope="col">Aralık</th>
+                                <th scope="col">Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">
+                                    <h5 class=""> Personel</h5>
+                                </td>
+                                @foreach (var item in Model.personel)
+                                {
+
+                                    <td class="text-center">
+                                        <a class="btn  btnara" data-title="Personel Giderleri" data-yil="2020" data-ay="@item.MONTH_" data-code="@item.KEBIRCODE">@Math.Abs(item.Toplam) ₺</a>
+                                    </td>
+
+                                    toplempersonel = toplempersonel + item.Toplam;
+                                    aysayisi--;
+                                }
+                                @for (int i = 0; i < aysayisi; i++)
+                                {
+                                    <td class="text-center">
+                                        <a class="btn ">0 ₺</a>
+                                    </td>
+                                }
+
+                                <td class="text-center">
+                                    <h4>@Math.Abs(toplempersonel) ₺</h4>
+
+                                </td>
+
+                            </tr>
+
+
+
+                            @*<tr>
+                                <td class="text-center">
+                                    <span class="badge badge-success"> Taşıtlar</span>
+                                </td>
+
+
+
+                                @foreach (var item in Model.tasit)
+                                {
+
+
+                                    <td class="text-center">
+                                        <a class="btn btn btn-outline-warning btnara" data-yil="2020" data-ay="@item.MONTH_" data-code="@item.KEBIRCODE">@Convert.ToInt32(item.Toplam)</a>
+                                    </td>
+
+                                    toplemtasit = toplemtasit + item.Toplam;
+                                    aysayisi1--;
+                                }
+                                @for (int i = 0; i < aysayisi1; i++)
+                                {
+                                    <td class="text-center">
+                                        <a class="btn btn btn-outline-warning">0</a>
+                                    </td>
+                                }
+
+                                <td class="text-center">
+
+                                    <a class="btn btn btn-success text-white">@toplemtasit</a>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="text-center">
+                                    <span class="badge badge-secondary"> Pos Komisyonları</span>
+                                </td>
+                                @foreach (var item in Model.pos)
+                                {
+
+
+                                    <td class="text-center">
+                                        <a class="btn btn btn-outline-warning btnara" data-yil="2020" data-ay="@item.MONTH_" data-code="@item.KEBIRCODE">@Convert.ToInt32(item.Toplam)</a>
+                                    </td>
+
+                                    toplempos = toplempos + item.Toplam;
+                                    aysayisi2--;
+                                }
+                                @for (int i = 0; i < aysayisi2; i++)
+                                {
+                                    <td class="text-center">
+                                        <a class="btn btn btn-outline-warning">0</a>
+                                    </td>
+                                }
+
+
+                                <td class="text-center">
+                                    <a class="btn btn btn-success text-white" style="">@toplempos</a>
+
+                                </td>
+                            </tr>*@
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+@*SELECT (((SELECT  COUNT(DISTINCT fa.[Cari Kodu]) AS FIRMA FROM ARY_XXX_AYRINTILI_SATIS_RAPORU fa WHERE
+fa.[Satır Net Tutarı KDV Dahil]<2000 AND fa.[Fatura Türü]='Perakende Satış Faturası' AND fa.[Satır Türü]='Malzeme' AND fa.[Satış Temsilcisi]=fat.[Satış Temsilcisi] AND fa.[Fatura Tarihi] BETWEEN '2020-6-01' AND '2020-6-6' AND fa.[Satış Temsilcisi] IS NOT NULL
+                                     GROUP BY fa.[Satış Temsilcisi])*100) /(SELECT COUNT([Cari Kodu]) bayi FROM ARY_017_CARI_MUSTER_TEMSILCI WHERE [Satış Temsilcisi]=fat.[Satış Temsilcisi])) f
+                                     , SUM([Satır Miktarı])*(1) AS ADET, ROUND(SUM([Satır Net Tutarı KDV Dahil]), 0)*(1) AS CIRO, COUNT(DISTINCT fat.[Cari Kodu]) AS FIRMA, COUNT(DISTINCT [Model]) AS CESIT, ISNULL(fat.[Satış Temsilcisi],'?') AS KULLANICI FROM ARY_XXX_AYRINTILI_SATIS_RAPORU fat WHERE fat.[Fatura Türü]='Perakende Satış Faturası' AND fat.[Satır Türü]='Malzeme' AND fat.[Fatura Tarihi] BETWEEN '2020-6-01' AND '2020-6-6' AND
+                                     fat.[Satış Temsilcisi] IS NOT NULL GROUP BY fat.[Satış Temsilcisi] ORDER BY ROUND(SUM([Satır Net Tutarı KDV Dahil]), 0)*(1) DESC
+                                     SELECT COUNT([Cari Kodu]) bayi FROM ARY_017_CARI_MUSTER_TEMSILCI WHERE [Satış Temsilcisi]='SELDA YOLCUOĞLU'
+                                     SELECT COUNT(DISTINCT fa.[Cari Kodu]) AS FIRMA FROM ARY_XXX_AYRINTILI_SATIS_RAPORU fa WHERE
+                                     fa.[Satır Net Tutarı KDV Dahil]<2000 AND fa.[Fatura Türü]='Perakende Satış Faturası' AND fa.[Satır Türü]='Malzeme' AND fa.[Satış Temsilcisi]='SELDA YOLCUOĞLU' AND fa.[Fatura Tarihi] BETWEEN '2020-6-01' AND '2020-6-6' AND fa.[Satış Temsilcisi] IS NOT NULL
+GROUP BY fa.[Satış Temsilcisi]
+
+
+SELECT KEBIRCODE, MONTH_,SUM(CREDIT - DEBIT) Toplam from LG_017_01_EMFLINE
+                          WHERE YEAR_ = 2020 AND KEBIRCODE = 760 GROUP BY  MONTH_ , KEBIRCODE ORDER BY MONTH_
+
+SELECT * from LG_017_01_EMFLINE where ACCOUNTCODE='770.01.01.0001'
+
+SELECT KEBIRCODE, MONTH_,CEILING(SUM(CREDIT - DEBIT)) Toplam from LG_017_01_EMFLINE
+                          WHERE YEAR_ = 2020 AND KEBIRCODE = 760 GROUP BY  MONTH_,KEBIRCODE ORDER BY MONTH_
+
+SELECT KEBIRCODE, MONTH_,FLOOR(SUM(CREDIT - DEBIT)) Toplam from LG_017_01_EMFLINE
+                          WHERE YEAR_ = 2020 AND KEBIRCODE = 760 GROUP BY  MONTH_,KEBIRCODE ORDER BY MONTH_
+
+SELECT KEBIRCODE, MONTH_,CAST(SUM(CREDIT - DEBIT) AS DECIMAL(10,3)) Toplam from LG_017_01_EMFLINE
+                          WHERE YEAR_ = 2020 AND KEBIRCODE = 760 GROUP BY  MONTH_,KEBIRCODE ORDER BY MONTH_
+
+
+SELECT CEILING(1235.53)
+SELECT FLOOR(1235.53)
+SELECT CAST(1235.53 AS INT)
+
+SELECT CAST(ROUND(CAST(3.63797880709171E-12 ), 0) AS INT)*@ 

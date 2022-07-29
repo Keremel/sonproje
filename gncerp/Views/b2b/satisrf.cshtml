@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "babsformum";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Scripts{
+
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "satisrfQuery";
+        var bastarih = "null";
+        var bistarih = "null";
+        $(function () {
+            $("#btnara").click(function(){
+               ekstreselect= $("#ekstreselect").val();
+               bastarih= $("#bastarih").val();
+                bistarih = $("#bistarih").val();
+                recordtable.draw();
+            });
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/b2b/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = ["@CurrentSession.Caricodu", "0"];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "faturano", class:"text-center"},
+                    { "data": "adi", class: "text-center" },
+                    { "data": "carikodu", class: "text-center" },
+                    {
+                        "data": "faturatarihi", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY HH:mm");
+                            else
+                                return "";
+                        }
+                    }
+
+                ]
+
+            });
+              $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+             //startDate: '-3d'
+               });
+
+
+        });
+
+        </script>
+
+
+
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Satış Raporlarım/Faturalarım    </h4>
+
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group col-md-2"></div>
+                            <div class="form-group col-md-3">
+                                <label>Başlagıç</label>
+
+                                <input id="bastarih" class="form-control datepicker text-center" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="form-group col-md-3">
+
+                                <label>Bitiş</label>
+                                <input id="bistarih" class="form-control datepicker text-center" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label> Ara</label>
+                                <button class="btn btn-primary form-control" id="btnara"><i class=" fas fa-search"></i> </button>
+                            </div>
+
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Fatura No </th>
+                                    <th>Mazeme Adı </th>
+                                    <th>Cari Kodu </th>
+                                    <th>Fatura Tarihi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+

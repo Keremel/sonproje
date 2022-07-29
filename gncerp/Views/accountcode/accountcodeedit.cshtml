@@ -1,0 +1,151 @@
+﻿@model Accountcodemapping
+@{
+    ViewData["Title"] = "accountcodeedit";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+@section Scripts{
+
+    <script type="text/javascript">
+
+
+
+        $(function () {
+
+
+
+
+            $("#btnsave").click(function () {
+                if ($("#titletext").val().trim() == "") {
+                    alert("Kod Başlığı Giriniz");
+                    return false;
+                }
+
+                var codedizi = [];
+
+                $.each($("ul.contentlist li"), function () {
+
+                    codedizi.push($(this).attr("data-otext"));
+                });
+
+                if (codedizi.length == 0) {
+                    alert("Kodları Giriniz");
+                    return false;
+                }
+                $.LoadingOverlay("show");
+                $.ajax({
+                    url: "/accountcode/accountcodeedit/",
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify({ "title": $("#titletext").val(), "codes": codedizi,"id":@Model.id }),
+                    success: function (data) {
+                        $.LoadingOverlay("hide");
+                        if (data.status) {
+                            window.location.href = "?";
+                        }
+                        else {
+                            alert(data.message);
+                        }
+
+                    }
+                });
+                $.LoadingOverlay("hide");
+            });
+
+            $("#btncode").click(function () {
+                if ($("#codetext").val().trim() == "") {
+                    alert("Kodu Giriniz");
+                    return false;
+                }
+
+                addicerik($("#codetext").val())
+
+                $("#codetext").val("")
+            });
+
+            function addicerik(otext) {
+
+                $("#codediv").append("<li style='height:15px;margin-bottom:20px' class='ui-state-default mb-4 licontent'  data-otext='" + otext + "' >" + otext + " <a href='javascript:;' onclick='content_remove($(this))' class='btn btn-sm  btn-danger  float-right'>Sil</a></li>")
+            }
+
+        });
+
+        function content_remove(btn) {
+            var $this = btn.closest(".licontent");
+            $this.remove();
+
+        }
+
+
+        /**/</script>
+
+
+
+}
+
+<div class="page-breadcrumb">
+    <div class="row">
+
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Musaebe Kod Düzenle </h4>
+        
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-12" style="margin-bottom:10px">
+            <div class="card">
+                <div class="form-horizontal">
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="fname" class="col-sm-2 text-right control-label col-form-label">Kode Başlık</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="titletext" value="@Model.title" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="border-top">
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <label for="fname" class="col-sm-2 text-right control-label col-form-label">Kode</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="codetext" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 text-right">
+                                    <a href="javascript:;" class="btn btn-warning float-left" id="btncode"><i class="fa fa-fw fa-plus-circle"></i>&nbsp; Ekle</a>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <ul id="codediv" class="contentlist">
+
+                                    @foreach (var item in Model.accountcode.Split(','))
+                                    {
+                                      
+                                    <li style="height:15px;margin-bottom:20px" class="ui-state-default mb-4 licontent" data-otext="@item">@item <a href="javascript:;" onclick="content_remove($(this))" class="btn btn-sm  btn-danger  float-right">Sil</a></li>
+
+                                    }
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-horizontal col-12 text-center">
+            <a href="javascript:;" class="btn btn-success " id="btnsave"><i class="fa fa-save"></i>&nbsp;Kaydet</a>
+        </div>
+
+    </div>
+</div>
+

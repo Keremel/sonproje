@@ -1,0 +1,386 @@
+﻿
+@model dynamic
+@{
+    ViewData["Title"] = "userlist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "accountactivitiesQuery";
+
+        var tip;
+
+        $(function () {
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/appusers/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "info" },
+                    {
+                        "data": "amount", className: "text-center", "render": function (data, type, row) {
+
+                            if (data != null && data != "")
+                                return numeral(data).format('0,0');
+                            else
+                                return "";
+                        }
+                    },
+                    { "data": "activititype" },
+                    { "data": "taxnumber" },
+                    { "data": "processtype" },
+                    { "data": "transactiondate" },
+                    {
+                        "data": "recorddate", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY");
+                            else
+                                return "";
+                        }
+                    }, 
+                ]
+
+            });
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+            $("#ekle").click(function () {
+
+                $.confirm({
+                    title: 'Kullanıcı Ekle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/appusers/addUser",
+                                    data: JSON.stringify({
+                                        "name": this.$content.find('#name').val(),
+                                        "surname": this.$content.find('#surname').val(),
+                                        "role": this.$content.find('#role').val(),
+                                        "email": this.$content.find('#email').val(),
+                                        "password": this.$content.find('#password').val(),
+                                        "tel": this.$content.find('#tel').val(),
+                                        "username": this.$content.find('#username').val(),
+                                        "ispsv": this.$content.find('#username').is(":checked")
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtable.draw();
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Kullanıcı Düzenle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/appusers/updateUser",
+                                    data: JSON.stringify({
+                                        "name": this.$content.find('#name').val(),
+                                        "surname": this.$content.find('#surname').val(),
+                                        "role": this.$content.find('#role').val(),
+                                        "email": this.$content.find('#email').val(),
+                                        "password": this.$content.find('#password').val(),
+                                        "tel": this.$content.find('#tel').val(),
+                                        "username": this.$content.find('#username').val(),
+                                        "ispsv": this.$content.find('#username').is(":checked"),
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+                        }
+
+                    },
+                    onContentReady: function () {
+                        var self = this;
+                        $.ajax({
+                            type: "POST",
+                            url: "/appusers/getUserbyid",
+                            data: JSON.stringify({
+                                "id": id,
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                self.$content.find('#name').val(msg[0].name)
+                                self.$content.find('#surname').val(msg[0].surname)
+                                self.$content.find('#role').val(msg[0].role)
+                                self.$content.find('#email').val(msg[0].email)
+                                self.$content.find('#tel').val(msg[0].tel)
+                                self.$content.find('#username').val(msg[0].username)
+                                self.$content.find('#password').val(msg[0].password)
+                                self.$content.find('#ispsv').prop("checked", msg[0].ispsv)
+
+
+                            }
+                        });
+
+                    }
+                });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Emin misiniz!!',
+                    content: '',
+                    autoClose: 'İptal|8000',
+                    buttons: {
+                        deleteUser: {
+                            text: 'Devam Et',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/appusers/deleteUser",
+                                    data: JSON.stringify({
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            //$.notify("İşlem Başarılı");
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+
+                            }
+                        },
+                        İptal: function () {
+
+
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+
+        /**/</script>
+
+
+    <script type="text/template" id="formtemplete">
+        <div class="col-md-12 ">
+            <div class="form-group col-md-12 ">
+                <label>İsim</label>
+                <input class="form-control " id="name" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Soyisim</label>
+                <input class="form-control" id="surname" />
+            </div>
+            <div class="form-group col-md-12">
+
+                <label class="">Role</label>
+                <select class="form-control" id="role">
+                    <option>admin</option>
+                    <option>satis</option>
+                    <option>muhasebe</option>
+                    <option>yonetim</option>
+                </select>
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Username</label>
+                <input class="form-control" id="username" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Email</label>
+                <input class="form-control" id="email" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Telefon </label>
+                <input class="form-control" id="tel" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Şifre</label>
+                <input class="form-control" id="password" />
+            </div>
+            <div class="form-group col-md-12">
+                <label for="ispsv">Pasif  </label>
+                <input type="checkbox" id="ispsv" />
+            </div>
+
+
+        </div>
+    </script>
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Hesap Hareketleri</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block " aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">@Model[0].name</a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">@Model[0].anumber </li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="text-center">
+                    <h1>Cari Bakiyesi     @string.Format("{0:C0}",Convert.ToDecimal(Model[0].caribakiye))  </h1>
+                    <h1>Açılış Bakiyesi @string.Format("{0:C0}", Convert.ToDecimal(Model[0].acilisbakiye))  </h1>
+                </div>
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table id="recordtable" class="table table-sm table-bordered dataTable">
+                            <thead class="">
+                                <tr>
+
+                                    <th>Açıklama</th>
+                                    <th>Tutar </th>
+                                    <th>BorçAlaçak</th>
+                                    <th>Vergi No </th>
+                                    <th> İşlem Tip</th>
+                                    <th> Islem Tarihi</th>
+                                    <th> Kayıt Tarihi</th>
+                                    <th> </th>
+
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

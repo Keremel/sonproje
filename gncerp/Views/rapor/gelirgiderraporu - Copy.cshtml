@@ -1,0 +1,1044 @@
+﻿@model List<GelirgiderraporuModel>
+@{
+    ViewData["Title"] = "gelirgiderraporu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    double top = 0;
+    int j = 0;
+  
+
+    int currentmonth;
+    if (ViewBag.ay == 0)
+    {
+        currentmonth = Helpertype.currentmonth;
+    }
+    else {
+        currentmonth = ViewBag.ay;
+    }
+
+}
+<style>
+    .baslik {
+        width: 150px;
+    }
+
+    .aynu {
+        font-size: 14px;
+          color: black;
+    }
+
+    .toplamnu {
+        font-size: 16px;
+        color: #ff0000;
+        font-weight: bold;
+    }
+
+    .toplamay {
+        font-size: 14px;
+        color: #ff0000;
+        font-weight: bold;
+    }.toplamortalama {
+        font-size: 14px;
+        color: #66962b;
+        font-weight: bold;
+    }
+</style>
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Gelir Gider  Raporu </h4>
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body table-responsive">
+                    <a href="/rapor/gelirgiderraporu/?yil=2020&ay=0" class="btn btn-success ">2020</a>
+                    <a href="/rapor/gelirgiderraporu/?yil=2019&ay=0" class="btn btn-success">2019</a>
+                    <a href="/rapor/gelirgiderraporu/?yil=2018&ay=0" class="btn btn-success">2018</a>
+
+                </div>
+             
+                <div class="card-body table-responsive">
+                    @foreach (var item in Helpertype.Aylar)
+                    {
+                        <a href="/rapor/gelirgiderraporu?yil=@ViewBag.yil&ay=@item.Key" class="btn btn-danger ">@item.Value</a>
+                    }
+
+
+
+                </div>
+            </div>
+
+        </div>
+        <div class="col-12">
+            <div class="card" >
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#PERSONEL GİDERLERİ</span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalam</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+                        x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                        || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                        || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                        || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")))
+                            {
+                            <tr>
+                                <td class="baslik">
+                                    <h5> @item.accountcodemapping.title</h5>
+                                </td>
+                                @for (int i = 1; i <= currentmonth; i++)
+                                {
+
+
+
+                                    @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                    {
+                                        <td class="aynu @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+
+                                            @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="aynu">
+                                            @string.Format("{0:C2}", 0)
+
+                                        </td>
+                                    }
+
+
+
+
+                                }
+
+
+                            <td class="toplamortalama">
+
+
+                                @string.Format("{0:C2}",item.tgider.Sum(x => x.toplam) / currentmonth)
+
+
+   
+                            </td>
+                                <td class="toplamnu">
+
+
+
+
+                                    @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+
+                                </td>
+                            </tr>
+                            }
+
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam</h5>
+
+                            </td>
+
+                            @for (int i = 1; i <= currentmonth; i++)
+                            {
+
+
+                                <td class="toplamay ">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                         || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                         || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                         || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+
+
+
+                                </td>
+                            }
+                            <td class="toplamortalama">
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                     x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                     || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                     || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                     || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+                            </td>
+
+                            <td class="toplamnu">
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                     x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                     || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                     || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                     || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-warning">#BÜRO SABİT GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                         x.accountcodemapping.title.Contains("KİRALAR")
+                         || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                         || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")))
+                            {
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> @item.accountcodemapping.title</h5>
+                                </td>
+                                @for (int i = 1; i <= currentmonth; i++)
+                                {
+
+
+
+                                    @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                    {
+                                        <td class="aynu  @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+
+                                            @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="aynu">
+                                            @string.Format("{0:C2}", 0)
+
+                                        </td>
+                                    }
+
+
+
+
+                                }
+
+                                <td class="toplamortalama">
+                                    @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam)/currentmonth)
+                                </td>
+
+                                <td class="toplamnu">
+                                    @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+                                </td>
+                            </tr>
+                            }
+
+
+                            <tr>
+                                <td class="baslik">
+                                    <h5> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 1; i <= currentmonth; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+                                        @string.Format("{0:C2}", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                               || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                               || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+                                    </td>
+                                }
+
+                                <td class="toplamortalama">
+
+                                    @string.Format("{0:C2}", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+                                </td>     <td class="toplamnu">
+
+                                    @string.Format("{0:C2}", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-success">#GENEL İDARE GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                              <th scope="col">Ortalam</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                                x.accountcodemapping.title.Contains("TELEFON SABİT")
+                              || x.accountcodemapping.title.Contains("TELEFON GSM")
+                              || x.accountcodemapping.title.Contains("İNTERNET")
+                              || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                              || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("OTO MASRAFLARI")  
+                              || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                              || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                              || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                              || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                              || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                              || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                              || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                              || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                              || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                              ))
+                            {
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> @item.accountcodemapping.title</h5>
+                                </td>
+                                @for (int i = 1; i <= currentmonth; i++)
+                                {
+
+
+
+                                    @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                    {
+                                        <td class="aynu  @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+                                            @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="aynu">
+                                            @string.Format("{0:C2}", 0)
+
+                                        </td>
+                                    }
+
+
+
+
+                                }
+
+                                <td class="toplamortalama">
+                                    @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam) / currentmonth)
+                                </td>
+                                <td class="toplamnu">
+                                    @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+                                </td>
+                            </tr>
+                            }
+
+
+                        <tr>
+                            <td>
+                                <h5 class=""> Toplam</h5>
+
+                            </td>
+
+                            @for (int i = 1; i <= currentmonth; i++)
+                            {
+
+
+                                <td class="toplamay">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                           ).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+                                </td>
+                            }
+                            <td class="toplamortalama">
+
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("TELEFON SABİT")
+                       || x.accountcodemapping.title.Contains("TELEFON GSM")
+                       || x.accountcodemapping.title.Contains("İNTERNET")
+                       || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                       || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                       || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                       || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                       || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                       || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                       || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                       ).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+
+                            </td>
+                            <td class="toplamnu">
+
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("TELEFON SABİT")
+                       || x.accountcodemapping.title.Contains("TELEFON GSM")
+                       || x.accountcodemapping.title.Contains("İNTERNET")
+                       || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                       || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                       || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                       || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                       || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                       || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                       || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                       || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                       ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-primary">#SATIŞ & DAGITIM GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                                  x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                              || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                              || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                              || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("HAVALE")
+                              || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                              ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 > @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= currentmonth; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                        {
+                                            <td class="aynu @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+                                                @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu">
+                                                @string.Format("{0:C2}", 0)
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam)/currentmonth)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                        <tr>
+                            <td>
+                                <h5 class=""> Toplam</h5>
+
+                            </td>
+
+                            @for (int i = 1; i <= currentmonth; i++)
+                            {
+
+
+                                <td class="toplamay">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                               x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           ).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+                                </td>
+                            }
+                            <td class="toplamortalama">
+                                @string.Format("{0:C2}", Model.Where(x =>
+                           x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                       || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                       || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                       || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("HAVALE")
+                       || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                       ).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+                            </td>
+                            <td class="toplamnu">
+
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                           x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                       || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                       || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                       || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("HAVALE")
+                       || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                       || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                       ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-info">#BAĞIŞ VE YARDIMLAR</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                        x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+
+                              ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 > @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= currentmonth; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                        {
+                                            <td class="toplamay @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+                                                @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="toplamay">
+                                                @string.Format("{0:C2}", 0)
+
+                                            </td>
+                                        }
+
+                                    }
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam)/currentmonth)
+                                    </td> <td class="toplamnu">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-orange">#AMORTİSMAN GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                          x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                              ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 class=""> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= currentmonth; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == i.ToString()) != null)
+                                        {
+                                            <td class="toplamay @(item.tgider.Sum(x => x.toplam) / currentmonth < item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam ? "text-danger" :"1")">
+                                                @string.Format("{0:C2}", item.tgider.FirstOrDefault(x => x.ay == i.ToString()).toplam)
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="toplamay">
+                                                @string.Format("{0:C2}", 0)
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam)/currentmonth)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:C2}", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+                                     <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam</h5>
+
+                            </td>
+
+                            @for (int i = 1; i <= currentmonth; i++)
+                            {
+
+
+                                <td class="toplamay ">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                              || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                         ).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+
+
+
+                                </td>
+                            }
+                            <td class="toplamortalama">
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                         ).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+                            </td>
+
+                            <td class="toplamnu">
+
+                                @string.Format("{0:C2}", Model.Where(x =>
+                       x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                         ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+
+                        </tr>
+
+             
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="badge badge-success">#Dip Toplam </span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => x.Key <= currentmonth))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                                <th scope="col">Ortama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+
+
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> Toplam</h5>
+                                </td>
+
+                                @for (int i = 1; i <= currentmonth; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+
+                                        @string.Format("{0:C2}", Model.Where(x =>
+                                x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                               || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                               || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                               || x.accountcodemapping.title.Contains("KİRALAR")
+                               || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                               || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                               || x.accountcodemapping.title.Contains("TELEFON GSM")
+                               || x.accountcodemapping.title.Contains("İNTERNET")
+                               || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                               || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                               || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                               || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                               || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                               || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                               || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                               || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                               || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                               || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("HAVALE")
+                               || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                               || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                               || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                               ).Sum(x => x.tgider.Where(b => b.ay == i.ToString()).Sum(a => a.toplam)))
+                                    </td>
+                                    
+                                }
+                                <td class="toplamortalama">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                            x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                           || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                           || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                           || x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                           || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+
+                           ).Sum(x => x.tgider.Sum(a => a.toplam))/currentmonth)
+                                </td>
+                                <td class="toplamnu">
+
+
+                                    @string.Format("{0:C2}", Model.Where(x =>
+                            x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                           || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                           || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                           || x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                           || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

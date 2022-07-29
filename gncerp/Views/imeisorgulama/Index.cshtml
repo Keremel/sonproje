@@ -1,0 +1,99 @@
+﻿
+@{
+    ViewData["Title"] = "IMEI Sorgulama";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+        $(function () {
+
+            $("#sorgulabtn").click(function () {
+                console.log($("#sorgulainput").val())
+                 loader.start();
+                $.ajax({
+                    type: "POST",
+                    url: "/imeisorgulama/sorgula",
+                    data: JSON.stringify({ "id": $("#sorgulainput").val() }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+                        loader.stop();
+                        var jsondata = msg;
+                        
+                      
+                        if (jsondata.status) {
+
+                            if (jsondata.message == "0") {
+                                $("#msjsdanger").html("GENÇPA çıkışlı değildir")
+                                 $("#msjsuccess").html("")
+                            } else {
+                                $("#msjsuccess").html("Bu cihaz GENÇPA çıkışlı cihazdır. ")
+                                $("#msjsdanger").html("")
+                            }
+                            //utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                         
+
+                        }
+                        else {
+                            alert(jsondata.message)
+                        }
+
+                    }
+                });
+
+            });
+        });
+            
+
+        /**/</script>
+
+
+}
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">IMEI Sorgulama</h4>
+
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card">
+
+                <div class="card-body table-responsive">
+                    <div class="col-md-12" style="margin-top:50px">
+                        <div class="row">
+
+                            <input class="form-control col-md-8 " id="sorgulainput" />
+                            <div class="col-md-1"></div>
+                            <a class="btn btn-warning col-md-2" id="sorgulabtn"> Sorgula</a>
+                        </div>
+
+                    </div>
+                    <div class="col-md-12">
+                        <div class="text-center">
+
+                            <h2 class="text-success" id="msjsuccess"></h2>
+                            <h2 class="text-danger" id="msjsdanger"></h2>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+

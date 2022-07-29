@@ -1,0 +1,361 @@
+﻿
+@{
+    ViewData["Title"] = "carihesapekstresi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    dynamic hesapturu = string.Format("SELECT cel.HAREKET_TURU tur from ARY_XXX_CARI_EKSTRE_LOGOB2B cel group by cel.HAREKET_TURU").GetDynamicQuery("SCSlogo");
+
+}
+
+    <style>
+ 
+        .fiyat {
+            font-size: 18px;
+            color: #66962b;
+            font-weight: bold;
+        }
+
+        .text {
+            font-size: 18px;
+            color: #000000;
+            font-weight: bold;
+        }
+    </style>
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        var recordtable;
+        var _defaulttablename = "carihesapekstresiQuery";
+        var _tablename = "Sale";
+        var ekstreselect = "Tüm Tipler";
+        var bastarih = "null";
+        var bistarih = "null";
+        var borcdizi = [];
+        var borc = 0;
+        var alacakdizi = [];
+        var alacak = 0;
+
+
+        $(function () {
+
+            $("#btnara").click(function(){
+               ekstreselect= $("#ekstreselect").val();
+               bastarih= $("#bastarih").val();
+                bistarih = $("#bistarih").val();
+                recordtable.draw();
+            });
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/b2b/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = ["@CurrentSession.Caricodu",ekstreselect,bastarih,bistarih];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "islemno" },
+                    {
+                        "data": "borc", className: "text-center", "render": function (data, type, row) {
+                            return data+" ₺";
+                        }
+                    },
+                    {
+                        "data": "alacak", className: "text-center", "render": function (data, type, row) {
+                            return data+" ₺";
+                        }
+                    },
+                    { "data": "hareketturu" },
+                    {
+                        "data": "tarih", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY HH:mm");
+                            else
+                                return "";
+                        }
+                    },
+                    {
+                        "data": "vadetarihi", className: "text-center", "render": function (data, type, row) {
+                            if (data != null && data != "")
+                                return moment(data).format("DD.MM.YYYY HH:mm");
+                            else
+                                return "";
+                        }
+                    },
+                     { "data": "temsilci" }
+                ],
+                 "rowCallback": function( row, data ){
+                     alacakdizi.push(data.alacak);
+                     borcdizi.push(data.borc);
+
+                },
+                 "initComplete": function( settings, json ) {
+                      alacakdizi.forEach((element) => {
+                          alacak = alacak + element;
+
+                      })
+                         borcdizi.forEach((element) => {
+                             borc = borc + element;
+
+                         })
+                     borctext
+                     $("#alacaktext").html(alacak)
+                     $("#borctext").html(borc)
+
+                     $("#tolamtext").html(alacak-borc)
+
+                   }
+
+            });
+
+
+
+
+            $(".dataTable tbody").on("click", "a.btnadd", function () {
+                var id = $(this).attr("data-id");
+                loader.start();
+                $.ajax({
+                    type: "POST",
+                    url: "/entegrasyon/SetSales",
+                    data: JSON.stringify({ "id": id }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        loader.stop();
+                        if (response.status) {
+                            console.log(response)
+                            utilities.onscreen(utilities.dil_ceviri("Sipariş Oluşturuldu.", "kayit_basarili"));
+                            recordtable.draw();
+
+                            return true;
+                        }
+                        else {
+                            jq_alert(response.message);
+                        }
+                    }
+                });
+
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+                loader.start();
+                $.ajax({
+                    type: "POST",
+                    url: "/entegrasyon/Setremove",
+                    data: JSON.stringify({ "id": id }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        loader.stop();
+                        if (response.status) {
+                            console.log(response)
+                            utilities.onscreen(utilities.dil_ceviri("Tamamlanan Şiparişlere Eklendi", "kayit_basarili"));
+                            recordtable.draw();
+
+                            return true;
+                        }
+                        else {
+                            jq_alert(response.message);
+                        }
+                    }
+                });
+
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                loader.start();
+
+                jq_dialog("Şube Düzenle", $("#formtemplete").html(),
+                    function () { // open
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/getbyid",
+                            data: JSON.stringify({ "id": id, "tablename": _tablename }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                loader.stop();
+                                loadFormFromData(msg[0], _tablename);
+                            }
+                        });
+                    },
+                    function () { //ok
+                        var tableObj = createTableObject(_tablename);
+                        if (tableObj.length == 0 || tableObj == false)
+                            return false;
+
+
+
+                        loader.start();
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/generalupdate",
+                            data: JSON.stringify({ "table": tableObj, "id": id, "tablename": _tablename, "methodsAndParams": [] }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                loader.stop();
+                                var jsondata = msg;
+                                if (jsondata.status) {
+                                    utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                                    recordtable.draw();
+
+                                    $('#confirmmodal').modal("toggle");
+                                    return true;
+                                }
+                                else {
+                                    if (jsondata.returnvalue == "-2") {
+                                        utilities.alert(jsondata.message, "ui-icon-alert", "Dikkat", "dikkat");
+                                    }
+                                    else {
+                                        jq_alert(utilities.dil_ceviri("Hata oluştu", "hata_olustu") + " : " + jsondata.message);
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+                );
+            });
+
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+             //startDate: '-3d'
+               });
+        });
+
+    </script>
+
+
+    <script type="text/template" id="formtemplete">
+
+        <div class="form-group">
+            <label class="col-4 float-left">Şube Adı</label>
+            <input class="form-control col-8 notnull" data-table="dealers" data-column="title" data-type="string" data-maxlength="250" />
+        </div>
+        <div class="form-group">
+            <label class="col-4 float-left">Aktif</label>
+            <input type="checkbox" class="form-control col-8" data-table="dealers" data-column="status" data-type="int" />
+        </div>
+    </script>
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Cari Hesap Ekstresi </h4>
+
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-row">
+
+                        <div class="form-group col-md-3">
+                            <label>Başlagıç</label>
+
+                            <input id="bastarih" class="form-control datepicker text-center" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="form-group col-md-3">
+
+                            <label>Bitiş</label>
+                            <input id="bistarih" class="form-control datepicker text-center" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="ekstreselect">Ekstre Tipi</label>
+                            <select id="ekstreselect" class="form-control">
+                                <option>Tüm Tipler</option>
+                                @foreach (var item in hesapturu)
+                                {
+                                    <option>@item.tur</option>
+                                }
+
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label> Ara</label>
+                            <button class="btn btn-primary form-control" id="btnara"><i class=" fas fa-search"></i> </button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="form-row">
+
+                            <div class="form-group col-md-3"></div>
+                            <div class="form-group col-md-2">
+                                <label class="text"> Alacak :</label>
+
+                                <label id="alacaktext" class="text-center fiyat"></label>
+
+
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="text">Borç :</label>
+                                <label id="borctext" class="text-center fiyat"></label>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="text">Bakiye :</label>
+                                <label id="tolamtext" class="text-center fiyat"></label>
+
+                            </div>
+                            <div class="form-group col-md-3"></div>
+
+
+                        </div>
+                        </div>
+                 
+                    <div class="table-responsive">
+                        <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>İşlem No </th>
+                                    <th>Borç </th>
+                                    <th>Alacak  </th>
+                                    <th>Hareket Türü </th>
+                                    <th>Tarih </th>
+                                    <th>Vade Tarihi </th>
+                                    <th>Temsilci </th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

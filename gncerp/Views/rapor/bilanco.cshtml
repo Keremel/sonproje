@@ -1,0 +1,402 @@
+﻿@model BilancoModel
+
+@{
+    ViewData["Title"] = "bilanco";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+    double top = 0;
+    int j = 0;
+    Helpertype helpertype = new Helpertype();
+
+    List<string> moonlist = new List<string>();
+
+    foreach (var item in ViewBag.ay.Split(","))
+    {
+        moonlist.Add(item);
+    }
+}
+@section Scripts{
+
+
+    <script type="text/javascript">
+
+       var recordtable;
+       var _defaulttablename = "bilancoQuery";
+       var aylist="@ViewBag.ay";
+       var year="@ViewBag.yil";
+
+        $(document).ready(function () {
+
+
+
+            for (const val of aylist.split(",")) {
+                $("#che-"+val+"").prop( "checked", true );
+               }
+                 $("#"+year+"").attr('checked', true);
+
+                $("#getir").click(function () {
+
+
+                 var yil = $("input[name='yil']:checked").val();
+
+                var cboxval = new Array();
+
+                $.each($("#moons .moon"), function () {
+
+                    var pollid = $(this).attr("data-id");
+
+                  if ($('input[name="che-'+pollid+'"]').is(':checked')){
+                           cboxval.push(pollid);
+                  }
+
+                    window.location.href = "/rapor/bilanco?yil=" + yil + "&ay="+cboxval.join(",");
+
+                  })
+
+
+
+                });
+
+
+             $(".code").click(function () {
+
+                 var code = $(this).attr("data-code");
+                 console.log(code + year + aylist)
+
+         $.confirm({
+              title: 'Bilonco Detay!',
+             content: $("#formbilancodetay").html(),
+              columnClass: 'col-md-8',
+              containerFluid: true,
+             buttons: {
+                 formSubmit: {
+                     text: 'Kapat',
+                     btnClass: 'btn-blue'
+                     //action: function () {
+                     //    var name = this.$content.find('.name').val();
+                     //    if(!name){
+                     //        $.alert('provide a valid name');
+                     //        return false;
+                     //    }
+                     //    $.alert('Your name is ' + name);
+                     //}
+                 }
+
+             },
+             onOpen: function () {
+                recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/satis/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                         d.additionalvalues = [code,year,aylist];
+                        d.dataqueryname = _defaulttablename;
+
+                        return JSON.stringify(d);
+                    }
+                },
+                    "columns": [
+
+                    { "data": "LINEEXP" },
+                    { "data": "TRNET" },
+
+                ]
+
+              });
+
+               },
+            onContentReady: function () {
+
+
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    // if the user submits the form by pressing enter in the field.
+                    e.preventDefault();
+                jc.$$formSubmit.trigger('click'); // reference the button and click it
+                 });
+             }
+             });
+
+
+            });
+
+
+
+                });
+
+
+
+    </script>
+    <script type="text/template" id="formbilancodetay">
+
+        <div class="col-md-12">
+            <div class="table-responsive">
+
+                <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                    <thead>
+
+                        <tr>
+                            <th>Açıklama No </th>
+                            <th>Tutar  </th>
+
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </script>
+
+}
+
+
+<div class="col-md-12">
+
+    <h1>Bilonço</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Raporlar</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#">Genel Raporlar </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Bilonço</li>
+        </ol>
+    </nav>
+    
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+  
+
+
+            <div class="card mb-3">
+                <div class="card-body table-responsive">
+                    <div class="form-row">
+
+                        <div class=" col-md-1 form-group">
+                            <label for="2020">2020</label>
+                            <input type="radio" name="yil" value="2020" id="2020" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <label for="2019">2019</label>
+                            <input type="radio" name="yil" value="2019" id="2019" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <label for="2018">2018</label>
+                            <input type="radio" name="yil" value="2018" id="2018" />
+                        </div>
+                        <div class=" col-md-4 form-group">
+                            <a class="btn btn-success " id="getir">Getir</a>
+                        </div>
+
+                    </div>
+                    <div id="moons" class="form-row">
+                        @foreach (var item in Helpertype.Aylar)
+                        {
+                            <div class="moon col-md-1 form-group" data-id="@item.Key">
+                                <input id="che-@item.Key" type="checkbox" name="che-@item.Key">
+                                <label for="che-@item.Key"> @item.Value</label>
+
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-3">
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">
+                                <div class="col-12 d-flex no-block align-items-center">
+                                    <h4 class="page-title"># Aktif Hesaplar Varlıklar</h4>
+
+                                </div>
+                            </th>
+                            <th scope="col">Code</th>
+                            <th scope="col">Tutar</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.Bilanco_List_Aktif)
+                        {
+
+                            <tr>
+
+                                <td>
+                                    <a class="code btn btn-light" data-code="@item.code">  @item.title  </a>
+                                </td>
+
+                                <td class="text-center">
+                                    @item.code
+
+                                </td>
+                                <td class="text-center">
+
+                                    @string.Format("{0:C2}", item.toplam)
+                                </td>
+
+                            </tr>
+                        }
+                        <tr>
+
+                            <td class="text-center">
+                                Toplam
+                            </td>
+
+                            <td class="text-center">
+                            </td>
+                            <td class="text-center">
+
+                                @string.Format("{0:C2}", Model.Bilanco_List_Aktif.Sum(x => x.toplam))
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">
+                                <div class="col-12 d-flex no-block align-items-center">
+                                    <h4 class="page-title"># Kaynak Hesapları Pasifler</h4>
+
+                                </div>
+
+                            </th>
+                            <th scope="col">Code</th>
+
+                            <th scope="col">Tutar</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model.Bilanco_List_Pasif)
+                        {
+
+                            <tr>
+
+                                <td>
+                                    <a class="code btn btn-light" data-code="@item.code">  @item.title  </a>
+                                </td>
+
+                                <td class="text-center">
+                                    @item.code
+
+                                </td>
+                                <td class="text-center">
+                                    @string.Format("{0:C2}", item.toplam)
+                                </td>
+
+                            </tr>
+                        }
+                        <tr>
+
+                            <td>
+                                @if (Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam) > 0)
+                                {
+                                    <p>KÂR</p>
+                                }
+                                else
+                                {
+                                    <p>Zarar</p>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                KÂR
+                            </td>
+                            <td class="text-center">
+                                @string.Format("{0:C2}", Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam))
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                Toplam
+                            </td>
+
+                            <td class="text-center">
+                                Tümü
+                            </td>
+                            <td class="text-center">
+
+                                @string.Format("{0:C2}", Model.Bilanco_List_Pasif.Sum(x => x.toplam) + (Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam)))
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+                </table>
+
+
+
+            </div>
+        </div>
+
+        @*<div class="card">
+                <div class="card-body table-responsive">
+                    <div>
+                        <h1>
+                            @if (Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam) > 0)
+                            {
+                            <span>KÂR:</span> @string.Format("{0:C2}", Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam))
+                            }
+                            else
+                            {
+                                <span>Zarar :</span>@string.Format("{0:C2}", Model.Bilanco_List_Aktif.Sum(x => x.toplam) - Model.Bilanco_List_Pasif.Sum(x => x.toplam))
+                            }
+
+
+                        </h1>
+                    </div>
+
+
+
+
+                </div>
+            </div>*@
+    </div>
+
+
+</div>
+
+
+

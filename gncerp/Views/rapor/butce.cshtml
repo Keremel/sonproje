@@ -1,0 +1,667 @@
+﻿@model List<butceModel>
+
+@{
+    ViewData["Title"] = "butce";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+    int year = 2020;
+}
+@section Scripts{
+
+    <script type="text/javascript">
+
+       var aylist="@ViewBag.ay";
+
+        $(document).ready(function () {
+
+
+
+            for (const val of aylist.split(",")) {
+
+                $("#che-"+val+"").prop( "checked", true );
+
+               }
+                 $("#@ViewBag.yil").attr('checked', true);
+
+
+
+            $(".aycost").click(function () {
+                     var id = $(this).attr("data-id");
+                    var moon = $(this).attr("data-moon");
+                    var cost = $(this).attr("data-cost");
+                    var year = $(this).attr("data-year");
+                var accountcodemappingid = $(this).attr("data-accountcodemappingid");
+                var bttt = $(this);
+
+                    $.confirm({
+                    title: 'Bütçe',
+                    content: $("#formbutce").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                
+                        $.LoadingOverlay("show");
+                        $.ajax({
+                            type: "POST",
+                            url: "/rapor/setbutce",
+                            data: JSON.stringify({ "id": id, "moon": moon, "cost":this.$content.find('#lastcost').val(), "year": year,"accountcodemappingid":accountcodemappingid }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                  $.LoadingOverlay("hide");
+                                var jsondata = msg;
+
+                                console.log(jsondata);
+                                if (jsondata.status) {
+                                   $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                  bttt.html($("#lastcost").val())
+                                   
+                                    return true;
+                                }
+                                else {
+                                     $.alert(msg.message);
+                                }
+
+                            }
+                        });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+                    onOpen: function () {
+                        this.$content.find('#lastcost').val(cost)
+                    },
+                    onContentReady: function () {
+
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+
+
+
+            });
+        });
+
+
+    </script>
+    <script type="text/template" id="formbutce">
+
+        <div class="form-group">
+            <label class="float-left">Butce</label>
+            <input class="form-control " type="text" id="lastcost" />
+        </div>
+
+    </script>
+}
+
+<style>
+    table td {
+        position: relative;
+    }
+
+    .tooltip {
+        width: 400px;
+        height: 300px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, .3);
+        border-radius: 3px;
+        -webkit-border-radius: 3px;
+        position: absolute;
+        top: 5px;
+        left: 50px;
+        display: none;
+    }
+
+    .baslik {
+        width: 150px;
+    }
+
+    .aynu {
+        font-size: 14px;
+        color: black;
+    }
+
+    .toplamnu {
+        font-size: 16px;
+        color: #ff0000;
+        font-weight: bold;
+    }
+
+    .toplamay {
+        font-size: 14px;
+        color: #ff0000;
+        font-weight: bold;
+    }
+
+    .toplamortalama {
+        font-size: 14px;
+        color: #66962b;
+        font-weight: bold;
+    }
+</style>
+<div class="col-md-12">
+
+    <h1>Bütçe @year </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Raporlar</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#">Genel Raporlar </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Bütçe @year </li>
+        </ol>
+    </nav>
+    
+</div>
+
+
+
+
+
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#PERSONEL GİDERLERİ</span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+                                    x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                                    || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                                    || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                                    || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#BÜRO SABİT GİDERLERİ</span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("KİRALAR")
+|| x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+|| x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger"> #GENEL İDARE GİDERLERİ </span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+                   x.accountcodemapping.title.Contains("TELEFON SABİT")
+                   || x.accountcodemapping.title.Contains("TELEFON GSM")
+                   || x.accountcodemapping.title.Contains("İNTERNET")
+                   || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                   || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                   || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                   || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                   || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                   || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                   || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#SATIŞ & DAGITIM GİDERLERİ </span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+                    x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                    || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                    || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                    || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("HAVALE")
+                    || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                    || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#BAĞIŞ VE YARDIMLAR </span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR"))
+                               )
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div> 
+
+        <div class="col-md-12">
+            <div class="card mb-3">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger">#AMORTİSMAN GİDERLERİ </span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar)
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+|| x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+
+
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == i) != null)
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="@item.budget.FirstOrDefault(x => x.moon == i).id" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="@item.budget.FirstOrDefault(x => x.moon == i).cost">
+
+                                                    @item.budget.FirstOrDefault(x => x.moon == i).cost
+                                                </a>
+
+
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu text-center">
+                                                <a class="btn btn-light aycost" data-moon="@i" data-id="0" data-year="@year" data-accountcodemappingid="@item.accountcodemapping.id" data-cost="0">
+
+                                                    0
+                                                </a>
+
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>

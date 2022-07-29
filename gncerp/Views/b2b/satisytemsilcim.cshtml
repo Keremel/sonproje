@@ -1,0 +1,42 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "satisytemsilcim";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Satiş Temsilcim   </h4>
+
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @*<h5 class="card-title">Form Elements</h5>*@
+
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span> Adı :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].st
+                        </div>
+
+                    </div>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

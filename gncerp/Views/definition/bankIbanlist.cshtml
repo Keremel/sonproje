@@ -1,0 +1,416 @@
+﻿
+@{
+    ViewData["Title"] = "bankinstallmentlist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+    dynamic banklist = string.Format("SELECT * FROM banks ").GetDynamicQuery();
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "bankIbanQuery";
+
+
+        var tip;
+
+        $(function () {
+
+            $(".dataTable tbody").on("click", "a.btnaddphoto", function () {
+
+                var id = $(this).attr("data-id");
+
+                $.confirm({
+                    title: 'Resim Ekle',
+                    content: $("#formtempleterimg").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                var formData = new FormData();
+
+                            
+                                if (this.$content.find('#fileupload')[0].files[0] == null) {
+                                    jq_alert("Dosyayı Seçiniz");
+                                }
+
+                                formData.append('imgfile', $('#fileupload')[0].files[0], "spot.jpg");
+                                formData.append('id', id);
+                                formData.append('imgtype', 'certificates');
+                                $.ajax('/definition/imageupload', {
+                                    method: 'POST',
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function (response) {
+                                        if (response.resultobj.status) {
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+                                            return true;
+                                        }
+                                        else {
+                                            $.alert(response.message);
+                                        
+                                        }
+                                    },
+                                    error: function () {
+                                        $alert.show().addClass('alert-warning').text('Hata oluştu');
+                                    },
+                                    complete: function () {
+                                        //$progress.hide();
+                                        return false;
+                                    },
+                                });
+
+
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+
+           
+            });
+
+
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/definition/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                        return '<img src="/img/bank/'+data+'/spot.jpg?' + Math.random() + '" data-id="' + data + '" onerror="this.src=\'/client/img/advance_feature_img.jpg\'" style="width:80px;" class="avatar special_img" alt=" ">';
+                    }
+                    },
+                    { "data": "bankname" },
+                    { "data": "iban" },
+                    { "data": "subecodu" },
+                    { "data": "accountno" },
+                    {
+                        "data": null, className: "text-center", "render": function (data, type, row) {
+                            var html = "<a   title='Resim Ekle' data-toggle='tooltip' data-id='" + row.id + "' href='javascript:;' class='btn btn-sm  btn-secondary btnaddphoto'><i class='simple-icon-picture'></i></a><a title='Düzenle' data-id='" + row.id + "' class='btn btn-sm btn-warning btnedit' data-toggle='tooltip' ><i class='simple-icon-note'></i></a><a   title='Sil' data-toggle='tooltip' data-id='" + row.id  + "' href='javascript:;' class='btn btn-sm btn-danger btnremove'><i class='simple-icon-close'></i></a>";
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+            $("#ekle").click(function () {
+
+                $.confirm({
+                    title: 'Ekle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/addBankIban",
+                                    data: JSON.stringify({
+                                        "bankname": this.$content.find('#bankname').val(),
+                                        "iban": this.$content.find('#iban').val(),
+                                        "subecodu": this.$content.find('#subecodu').val(),
+                                        "accountno": this.$content.find('#accountno').val(),
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtable.draw();
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Kullanıcı Düzenle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/updateBankIban",
+                                    data: JSON.stringify({
+                                        "bankname": this.$content.find('#bankname').val(),
+                                        "iban": this.$content.find('#iban').val(),
+                                        "subecodu": this.$content.find('#subecodu').val(),
+                                        "accountno": this.$content.find('#accountno').val(),
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+                        }
+
+                    },
+                    onContentReady: function () {
+                        var self = this;
+                        $.ajax({
+                            type: "POST",
+                            url: "/definition/getBankIban",
+                            data: JSON.stringify({
+                                "id": id,
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                self.$content.find('#bankname').val(msg[0].bankname)
+                                self.$content.find('#iban').val(msg[0].iban)
+                                self.$content.find('#subecodu').val(msg[0].subecodu)
+                                self.$content.find('#accountno').val(msg[0].accountno)
+                            }
+                        });
+
+                    }
+                });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Emin misiniz!!',
+                    content: '',
+                    autoClose: 'İptal|8000',
+                    buttons: {
+                        deleteUser: {
+                            text: 'Devam Et',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/deleteBankIban",
+                                    data: JSON.stringify({
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            //$.notify("İşlem Başarılı");
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+
+                            }
+                        },
+                        İptal: function () {
+
+
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+
+        /**/</script>
+    <script type="text/template"  id="formtempleterimg">
+        <div class="form-group">
+            <label class="col-4 float-left">Yükle</label>
+            <input class="btn btn-secondary" id="fileupload" type="file" />
+
+        </div>
+    </script>
+
+    <script type="text/template" id="formtemplete">
+   
+        <div class="col-md-12 ">
+
+            <div class="form-group col-md-12">
+                <label class="">Banka İsimi</label>
+                <input class="form-control" id="bankname" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">İban</label>
+                <input class="form-control" id="iban" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Hesap Numarası</label>
+                <input class="form-control" id="accountno" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Şube Kodu</label>
+                <input class="form-control" id="subecodu" />
+            </div>
+
+
+        </div>
+    </script>
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Banka Ibanları</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Tanımlamalar</a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Banka Ibanları </li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="ml-auto mb-3 text-right">
+                        <a class="btn btn-success btn-sm text-white" id="ekle"><i class="simple-icon-plus"></i>&nbsp;Yeni</a>
+                    </div>
+                    <div class="table-responsive">
+
+                        <table id="recordtable" class="table table-sm table-bordered dataTable">
+                            <thead class="">
+                                <tr>
+
+                                    <th>Logo  </th>
+                                    <th>İsim  </th>
+                                    <th>IBAN  </th>
+                                    <th>Şube kodu </th>
+                                    <th>Hesap No</th>
+                                    <th> </th>
+
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

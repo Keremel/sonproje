@@ -1,0 +1,95 @@
+﻿@model List<Salestarget>
+
+    @{
+    ViewData["Title"] = "personelSalestargets";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+    }
+    <div class="col-md-12">
+
+        <h1>Personel Hedef</h1>
+        <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+            <ol class="breadcrumb pt-0">
+                <li class="breadcrumb-item">
+                    <a href="#">Sipariş Raporlar </a>
+                </li>
+
+                <li class="breadcrumb-item active" aria-current="page">Personel Hedef</li>
+            </ol>
+        </nav>
+        
+    </div>
+
+    <div class="col-md-12">
+
+        <div class="row">
+            <div class="col-12">
+
+
+                <div class="list disable-text-selection">
+                    <div class="card d-flex flex-row mb-3">
+                        <div class="d-flex flex-grow-1 min-width-zero">
+                            <div class="card-body align-self-center d-flex flex-column flex-md-row justify-content-between min-width-zero align-items-md-center">
+                                <a class="list-item-heading mb-0 truncate w-40 w-xs-100 mt-0"
+                                   href="#">
+                                    <i class="simple-icon-user heading-icon"></i>
+                                    <span class="align-middle d-inline-block">Kullanıcılar</span>
+                                </a>
+                                <p class="align-middle d-inline-block">
+                                   Hedef
+
+                                </p>
+                                <p class="align-middle d-inline-block">
+                                   Ciro
+                                </p>
+                                <div class="w-15 w-xs-100">
+                                    <span class="badge badge-pill badge-secondary">Yüzdelik</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    @foreach (var item in Model)
+                    {
+                        <div class="card d-flex flex-row mb-3">
+                            <div class="d-flex flex-grow-1 min-width-zero">
+                                <div class="card-body align-self-center d-flex flex-column flex-md-row justify-content-between min-width-zero align-items-md-center">
+                                    <a class="list-item-heading mb-0 truncate w-40 w-xs-100 mt-0"
+                                       href="#">
+                                        <i class="simple-icon-user heading-icon"></i>
+                                        <span class="align-middle d-inline-block">@item.username</span>
+                                    </a>
+                                    <p class="align-middle d-inline-block">
+                                        @string.Format("{0:C0}", item.target)
+
+                                    </p>
+                                    <p class="align-middle d-inline-block">
+                                        @string.Format("{0:C0}", item.ciro)
+                                    </p>
+                                    <div class="">
+
+                                        <div class="mb-1" style="width:200px">
+                                            <p class="mb-1">
+                                                @item.username
+                                                <span class="float-right text-muted">    @((int)Helpertype.YuzdelikChart(item.ciro, item.target))%/100</span>
+                                            </p>
+                                            <div class="progress" style="height: 10px">
+
+                                                <div class="progress-bar"
+                                                     role="progressbar" aria-valuenow=" @((int)Helpertype.YuzdelikChart(item.ciro, item.target))" aria-valuemin="0" aria-valuemax="100" style="width:@((int)Helpertype.YuzdelikChart(item.ciro, item.target))%; background-color:#e10f2c;
+                                                 "></div>
+                                            </div>
+                                        </div>
+                                   
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>

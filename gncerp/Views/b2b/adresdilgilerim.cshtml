@@ -1,0 +1,91 @@
+﻿@model dynamic
+
+@{
+    ViewData["Title"] = "adresdilgilerim";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+            <h4 class="page-title">Adresi Bilgileri  </h4>
+
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @*<h5 class="card-title">Form Elements</h5>*@
+
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span>Kişi / Kurum Adı :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].adi
+                        </div>
+
+                    </div>
+
+
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span> Telefon Ev/İş:</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].televis
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span>Telefon Cep :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].telcep
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span> E-Mail:</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].email
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span>Adresi :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].adresi
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span>il :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].il
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-lg-3 col-md-12 text-center">
+                            <span>İlçe :</span>
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            @Model[0].ilce
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

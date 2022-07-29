@@ -1,0 +1,107 @@
+﻿@model Appuser
+@{
+    ViewData["Title"] = "profile";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="mb-2">
+                <h1>@Model.username </h1>
+                <div class="text-zero top-right-button-container">
+                    <button type="button" class="btn btn-lg btn-outline-primary dropdown-toggle dropdown-toggle-split top-right-button top-right-button-single" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Düzenle
+                    </button>
+               
+                </div>
+                <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+                    <ol class="breadcrumb pt-0">
+                        <li class="breadcrumb-item">
+                            <a href="#">Profile</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">@Model.username</li>
+                    </ol>
+                </nav>
+            </div>
+
+
+            <ul class="nav nav-tabs separator-tabs ml-0 mb-5" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="first-tab" data-toggle="tab" href="#first" role="tab" aria-controls="first" aria-selected="true">PROFILE</a>
+                </li>
+
+                @*<li class="nav-item">
+                    <a class="nav-link " id="second-tab" data-toggle="tab" href="#second" role="tab" aria-controls="second" aria-selected="false">FOLLOWERS</a>
+                </li>*@
+            </ul>
+            <div class="tab-content">
+
+                    <div class="row">
+                        <div class="col-12 col-lg-5 col-xl-4 col-left">
+                            <div class="card mb-4">
+                                <div class="position-absolute card-top-buttons">
+                                    <button class="btn btn-outline-white icon-button ">
+                                        <i class="simple-icon-pencil"></i>
+                                    </button>
+                                </div>
+                                <img src="https://f0.pngfuel.com/png/442/17/computer-icons-user-profile-male-user-png-clip-art.png" alt="Detail Picture" class="card-img-top">
+
+                                <div class="card-body">
+                                    <p class="text-muted text-small mb-2">İsim Soyİsim</p>
+                                    <p class="mb-3">
+                                        @Model.name  @Model.surname
+                                    </p>
+
+                                    <p class="text-muted text-small mb-2">Email</p>
+                                    <p class="mb-3">@Model.email</p> 
+                                    <p class="text-muted text-small mb-2">Username</p>
+                                    <p class="mb-3">@Model.username</p>
+                                    <p class="text-muted text-small mb-2">Telefon</p>
+                                    <p class="mb-3">@Model.tel</p>
+
+                                    <p class="text-muted text-small mb-2">Sorumluluk</p>
+                                    <p class="mb-3">
+                                        <a href="#">
+                                            <span class="badge badge-pill badge-outline-theme-2 mb-1">@Model.role</span>
+                                        </a>
+                                    </p>
+                             
+                                </div>
+                            </div>
+        
+                        
+                        </div>
+                        <div class="col-12 col-lg-7 col-xl-8 col-right">
+                            <div class="row listing-card-container">
+
+                                <div class="col-sm-6 col-lg-6 col-xl-4 col-12 mb-4">
+                                    <div class="card">
+                                        <div class="position-relative">
+                                            <a href="Pages.Details.html"><img class="card-img-top" src="img/marble-cake-thumb.jpg" alt="Card image cap"></a>
+                                            <span class="badge badge-pill badge-theme-1 position-absolute badge-top-left">NEW</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <a href="Pages.Details.html">
+                                                <h6 class="mb-3 listing-heading ellipsis"><div style="margin: 0px; padding: 0px; border: 0px;">Podcasting Operational...</div></h6>
+                                            </a>
+                                            <footer>
+                                                <p class="text-muted text-small mb-0 font-weight-light">
+                                                    18.08.2018
+                                                </p>
+                                            </footer>
+                                        </div>
+                                    </div>
+                                </div>
+
+                    
+
+
+                            </div>
+                        </div>
+                    </div>
+          
+               
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,272 @@
+﻿
+
+
+@{
+    ViewData["Title"] = "salestargetslist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+    dynamic userlist = string.Format("  SELECT username,id FROM appusers WHERE ispsv=0 AND isdel=0 ").GetDynamicQuery();
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "salestargetsQuery";
+
+        var tip;
+
+        $(function () {
+
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/definition/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "username" },
+                    { "data": "year" },
+                    { "data": "month" },
+                    {
+                        "data": "target", className: "text-center", "render": function (data, type, row) {
+
+                            if (data != null && data != "")
+                                return numeral(data).format('0,0');
+                            else
+                                return "";
+                        }
+                    },
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = "<a title='Sil' data-toggle='tooltip' data-id='" + data + "' href='javascript:;' class='btn btn-sm btn-danger btnremove'><i class='simple-icon-close'></i></a>";
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+            $("#ekle").click(function () {
+
+                $.confirm({
+
+                    title: 'Ekle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/definition/addSalestargets",
+                                    data: JSON.stringify({
+                                        "year": this.$content.find('#year').val(),
+                                        "month": this.$content.find('#month').val(),
+                                        "appuserid": this.$content.find('#appuserid').val(),
+                                        "target": this.$content.find('#target').val(),
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtable.draw();
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+
+                    onOpen: function () {
+
+
+                    },
+                    onContentReady: function () {
+
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+                $.confirm({
+                    title: 'Emin misiniz!!',
+                    content: '',
+                    autoClose: 'İptal|8000',
+                    buttons: {
+                        deleteUser: {
+                            text: 'Devam Et',
+                            action: function () {
+                                    $.ajax({
+                                    type: "POST",
+                                    url: "/definition/deleteSalestargets",
+                                    data: JSON.stringify({
+                                        "id": id
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+
+                                        if (msg.status) {
+
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            //$.notify("İşlem Başarılı");
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            recordtable.draw();
+
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+
+                            }
+                        },
+                        İptal: function () {
+
+
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+
+     </script>
+
+
+    <script type="text/template" id="formtemplete">
+        <div class="col-md-12">
+
+            <div class="form-group col-md-12">
+                <label>Yıl</label>
+                <input class="form-control" id="year" value="@DateTime.Now.Year" disabled />
+            </div>
+
+            <div class="form-group col-md-12">
+                <label class="">Aylar</label>
+                <select class="form-control" id="month">
+                    @foreach (var item in Helpertype.Aylar)
+                    {
+                        <option value="@item.Key">@item.Value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group col-md-12">
+                <label class="">Kişi</label>
+                <select class="form-control" id="appuserid">
+                    @foreach (var item in userlist)
+                    {
+                        <option value="@item.id">@item.username</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group col-md-12">
+                <label class="">Hedef Satış</label>
+                <input class="form-control" id="target" type="number" />
+            </div>
+
+        </div>
+    </script>
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Satış Hedefi </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Tanımlamalar</a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Satış Hedefi  </li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="ml-auto mb-3 text-right">
+                        <a class="btn btn-success btn-sm text-white" id="ekle"><i class="simple-icon-plus"></i>&nbsp;Yeni</a>
+                    </div>
+                    <div class="table-responsive">
+
+                        <table id="recordtable" class="table table-sm table-bordered dataTable">
+                            <thead class="thead-light" >
+                                <tr>
+                                    <th>Kişi  </th>
+                                    <th>Yıl  </th>
+                                    <th>Ay </th>
+                                    <th>Hedef  </th>
+                                    <th> </th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

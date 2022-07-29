@@ -1,0 +1,1319 @@
+﻿@model List<GelirgiderraporuModel>
+
+@{
+    ViewData["Title"] = "gelirgiderraporu";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+
+    List<string> moonlist = new List<string>();
+
+    foreach (var item in ViewBag.ay.Split(","))
+    {
+        moonlist.Add(item);
+    }
+
+}
+
+
+<link href="~/tooltip-hover-intent/sample.css" rel="stylesheet" />
+@section Scripts{
+
+    <script src="~/simple.money.format/simple.money.format.js"></script>
+    <script type="text/javascript">
+
+       var aylist="@ViewBag.ay";
+
+        $(document).ready(function () {
+            
+		    $('.money').simpleMoneyFormat();
+	
+            $('#budgetbtn').change(function () {
+                if ($(this).is(':checked')) {
+                      $(".budget").show();
+                }
+                else {
+                       $(".budget").hide();
+                }
+             
+                 });
+
+ 
+
+            for (const val of aylist.split(",")) {
+
+                $("#che-"+val+"").prop( "checked", true );
+
+            }
+
+               $("#@ViewBag.yil").attr('checked', true);
+
+               $("#getir").click(function () {
+
+
+                 var yil = $("input[name='yil']:checked").val();
+
+                var cboxval = new Array();
+
+                $.each($("#moons .moon"), function () {
+
+                    var pollid = $(this).attr("data-id");
+
+                  if ($('input[name="che-'+pollid+'"]').is(':checked')){
+                           cboxval.push(pollid);
+                  }
+
+                    window.location.href = "/rapor/gelirgiderraporu?yil=" + yil + "&ay="+cboxval.join(",");
+
+                  })
+
+
+
+                });
+
+
+               $(".code").click(function () {
+                
+                 var code = $(this).attr("data-code");
+
+
+         $.confirm({
+              title: 'Bilonco Detay!',
+             content: $("#formbilancodetay").html(),
+              columnClass: 'col-md-8',
+              containerFluid: true,
+             buttons: {
+                 formSubmit: {
+                     text: 'Kapat',
+                     btnClass: 'btn-blue'
+                     //action: function () {
+                     //    var name = this.$content.find('.name').val();
+                     //    if(!name){
+                     //        $.alert('provide a valid name');
+                     //        return false;
+                     //    }
+                     //    $.alert('Your name is ' + name);
+                     //}
+                 }
+             
+             },
+             onOpen: function () {
+                recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/satis/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                         d.additionalvalues = [code,year,aylist];
+                        d.dataqueryname = _defaulttablename;
+                        
+                        return JSON.stringify(d);
+                    }
+                },
+                    "columns": [
+              
+                    { "data": "LINEEXP" },
+                    { "data": "TRNET" },
+
+                ]
+
+              });
+           
+               },
+            onContentReady: function () {
+        
+               
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    // if the user submits the form by pressing enter in the field.
+                    e.preventDefault();
+                jc.$$formSubmit.trigger('click'); // reference the button and click it
+                 });
+             }
+             });
+
+
+              });
+
+               $("#budgetbtn").click(function () {
+               
+            });
+
+        });
+
+
+    </script>
+
+}
+
+
+
+<div class="col-12">
+
+    <h1>Gelir Gider  Raporu </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Raporlar</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#">Genel Raporlar </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Gelir Gider  Raporu </li>
+        </ol>
+    </nav>
+    
+</div>
+
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+
+            <div class="card mb-2">
+                <div class="card-body table-responsive">
+                    <div class="form-row">
+
+                        <div class=" col-md-1 form-group">
+                            <label for="2020">2021</label>
+                            <input type="radio" name="yil" value="2021" id="2021" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <label for="2020">2020</label>
+                            <input type="radio" name="yil" value="2020" id="2020" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <label for="2019">2019</label>
+                            <input type="radio" name="yil" value="2019" id="2019" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <label for="2018">2018</label>
+                            <input type="radio" name="yil" value="2018" id="2018" />
+                        </div>
+                        <div class=" col-md-1 form-group">
+                            <input id="budgetbtn" type="checkbox">
+                            <label for="budgetbtn"> Bütçe</label>
+
+                        </div>
+
+                        <div class=" col-md-2 form-group">
+                            <a class="btn btn-warning " id="getir">Getir</a>
+                        </div>
+
+
+                    </div>
+                    <div id="moons" class="form-row">
+                        @foreach (var item in Helpertype.Aylar)
+                        {
+                            <div class="moon col-md-1 form-group" data-id="@item.Key">
+                                <input id="che-@item.Key" type="checkbox" name="che-@item.Key">
+                                <label for="che-@item.Key"> @item.Value</label>
+
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-2">
+             
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm blueTable  table-bordered dataTable no-footer paleBlueRows">
+                        <thead >
+                            <tr>
+                                <th scope="col"> <span class="badge badge-danger tabletitle">#PERSONEL GİDERLERİ </span>  </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalam</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model.Where(x =>
+                        x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                        || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                        || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                        || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                        <td class="aynu hoverspan  @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+                                               
+                                                   @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                                   {
+                                                   <span class="budget  " style="display: none;" title="Bütçe">@string.Format("{0:#,0}", (int)item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)₺</span>
+                                                   }
+                                               
+                                        <span class="">  @string.Format("{0:#,0}", ((int)item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam))₺</span>
+
+
+                                       </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="aynu hoverspan">
+                                                @string.Format("{0:#,0} ₺", 0)
+
+                                                <span style="display: none;">
+                                                    <p>
+                                                        Bütçe:
+
+                                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                                        {
+                                                            @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost
+                                                        }
+                                                    </p>
+                                                </span>
+
+                                            </td>
+                                        }
+
+
+
+
+                                    }
+
+
+                                    <td class="toplamortalama">
+
+
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+
+
+
+                                    </td>
+                                    <td class="toplamnu">
+
+
+
+
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+
+                                    </td>
+                                </tr>
+                            }
+
+
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay ">
+
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                             || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                             || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                             || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+
+
+
+                                    </td>
+                                }
+                                <td class="toplamortalama">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                         || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                         || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                         || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+                                </td>
+
+                                <td class="toplamnu">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                         x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                         || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                         || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                         || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-warning tabletitle">#BÜRO SABİT GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("KİRALAR")
+|| x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+|| x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 class=""> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                <td class="aynu  @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+
+                                    @string.Format("{0:#,0} ₺", item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+
+
+                                </td>
+                                        }
+                                        else
+                                             {
+                                     <td class="aynu hoverspan">
+                                         <span class="budget" style="display: none;" title="Bütçe">
+                                   
+                                             @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                             {
+                                                 @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist         [  i].toint32()).cost)
+                                   
+                                             }
+                                   
+                                         </span>
+                                         @string.Format("{0:#,0} ₺", 0)
+
+                                </td>
+                                        }
+
+
+
+
+                                    }
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+                                    </td>
+
+                                    <td class="toplamnu">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                            <tr>
+                                <td class="baslik">
+                                    <h5> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                               || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                               || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                    </td>
+                                }
+
+                                <td class="toplamortalama">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+                                </td>
+                                <td class="toplamnu">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x => x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-success tabletitle">#GENEL İDARE GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                                <th scope="col">Ortalam</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                     x.accountcodemapping.title.Contains("TELEFON SABİT")
+                   || x.accountcodemapping.title.Contains("TELEFON GSM")
+                   || x.accountcodemapping.title.Contains("İNTERNET")
+                   || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                   || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                   || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                   || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                   || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                   || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                   || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                   || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                   ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 class=""> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                <td class="aynu hoverspan  @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+
+                                    @string.Format("{0:#,0} ₺", item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+
+                                </td>
+                                        }
+                                        else
+                                        {
+                                <td class="aynu hoverspan">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+                                    @string.Format("{0:#,0} ₺", 0)
+
+
+                                </td>
+                                        }
+
+
+
+
+                                    }
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                            <tr>
+                                <td>
+                                    <h5 class=""> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x =>
+                                 x.accountcodemapping.title.Contains("TELEFON SABİT")
+                               || x.accountcodemapping.title.Contains("TELEFON GSM")
+                               || x.accountcodemapping.title.Contains("İNTERNET")
+                               || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                               || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                               || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                               || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                               || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                               || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                               || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                               ).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                    </td>
+                                }
+                                <td class="toplamortalama">
+
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+
+                                </td>
+                                <td class="toplamnu">
+
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-primary tabletitle">#SATIŞ & DAGITIM GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+                       x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                   || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                   || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                   || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("HAVALE")
+                   || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                   || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                   ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                <td class="aynu hoverspan @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+
+                                    @string.Format("{0:#,0} ₺", item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+
+                                </td>
+                                        }
+                                        else
+                                        {
+                                <td class="aynu hoverspan">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+
+                                    @string.Format("{0:#,0} ₺", 0)
+
+
+
+                                </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                            <tr>
+                                <td>
+                                    <h5 class=""> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x =>
+                                   x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                               || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                               || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                               || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("HAVALE")
+                               || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                               ).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                    </td>
+                                }
+                                <td class="toplamortalama">
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                               x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+                                </td>
+                                <td class="toplamnu">
+
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                               x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-2">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-info tabletitle">#BAĞIŞ VE YARDIMLAR</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortalama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+
+                   ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                <td class="toplamay hoverspan @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+                                    @string.Format("{0:#,0} ₺", item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+
+
+
+
+                                </td>
+                                        }
+                                        else
+                                        {
+                                <td class="toplamay hoverspan">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+                                    @string.Format("{0:#,0} ₺", 0)
+
+
+                                </td>
+                                        }
+
+                                    }
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-2">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+                    <h4 class="page-title"> </h4>
+                    <table class="table table-sm table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-orange tabletitle">#AMORTİSMAN GİDERLERİ</span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+                                <th scope="col">Ortama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                            @foreach (var item in Model.Where(x =>
+x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+|| x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                   ))
+                            {
+                                <tr>
+                                    <td class="baslik">
+                                        <h5 class=""> @item.accountcodemapping.title</h5>
+                                    </td>
+                                    @for (int i = 0; i < moonlist.Count; i++)
+                                    {
+
+
+
+                                        @if (item.tgider.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                        {
+                                <td class="toplamay @(item.tgider.Sum(x => x.toplam) / moonlist.Count < item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam ? "text-danger" :"1")">
+
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+
+                                    @string.Format("{0:#,0} ₺", item.tgider.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+
+
+
+
+                                </td>
+                                        }
+                                        else
+                                        {
+                                <td class="toplamay">
+                                    <span class="budget" style="display: none;" title="Bütçe">
+
+                                        @if (item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()) != null)
+                                        {
+                                            @string.Format("{0:#,0} ₺", @item.budget.FirstOrDefault(x => x.moon == moonlist[i].toint32()).cost)
+
+                                        }
+
+                                    </span>
+                                    @string.Format("{0:#,0} ₺", 0)
+
+                                </td>
+                                        }
+
+
+
+
+                                    }
+
+
+
+                                    <td class="toplamortalama">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam) / moonlist.Count)
+                                    </td>
+                                    <td class="toplamnu">
+                                        @string.Format("{0:#,0} ₺", item.tgider.Sum(x => x.toplam))
+                                    </td>
+                                </tr>
+                            }
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> Toplam</h5>
+
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay ">
+
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                                  || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                             ).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+
+
+
+                                    </td>
+                                }
+                                <td class="toplamortalama">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                             x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                             ).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+                                </td>
+
+                                <td class="toplamnu">
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                           x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                                   || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                             ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+
+                            </tr>
+
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-2">
+            <div class="card mb-2">
+
+
+                <div class="card-body table-responsive">
+
+                    <table class="table table-sm  table-bordered dataTable no-footer">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col"><span class="badge badge-success tabletitle">#Dip Toplam </span> </th>
+
+                                @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                                {
+                                    <th scope="col">@item.Value</th>
+                                }
+
+
+                                <th scope="col">Ortama</th>
+                                <th scope="col">Toplam</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+
+
+                            <tr>
+                                <td class="baslik">
+                                    <h5 class=""> Toplam</h5>
+                                </td>
+
+                                @for (int i = 0; i < moonlist.Count; i++)
+                                {
+
+
+                                    <td class="toplamay">
+
+
+                                        @string.Format("{0:#,0} ₺", Model.Where(x =>
+                                x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                               || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                               || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                               || x.accountcodemapping.title.Contains("KİRALAR")
+                               || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                               || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                               || x.accountcodemapping.title.Contains("TELEFON GSM")
+                               || x.accountcodemapping.title.Contains("İNTERNET")
+                               || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                               || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                               || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                               || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                               || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                               || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                               || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                               || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                               || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                               || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                               || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("HAVALE")
+                               || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                               || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                               || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                               || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                               ).Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                    </td>
+
+                                }
+                                <td class="toplamortalama">
+
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                            x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                           || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                           || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                           || x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                           || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)) / moonlist.Count)
+                                </td>
+                                <td class="toplamnu">
+
+
+                                    @string.Format("{0:#,0} ₺", Model.Where(x =>
+                            x.accountcodemapping.title.Contains("PERSONEL ÜCRETLERİ")
+                           || x.accountcodemapping.title.Contains("PERSONEL SOSYAL HAKLAR")
+                           || x.accountcodemapping.title.Contains("PERSONEL EĞİTİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("KIDEM & İHBAR TAZMİNATI")
+                           || x.accountcodemapping.title.Contains("KİRALAR")
+                           || x.accountcodemapping.title.Contains("ELEKTRİK,SU,YAKIT")
+                           || x.accountcodemapping.title.Contains("BİNA YÖNETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TELEFON SABİT")
+                           || x.accountcodemapping.title.Contains("TELEFON GSM")
+                           || x.accountcodemapping.title.Contains("İNTERNET")
+                           || x.accountcodemapping.title.Contains("KIRTASİYE & MATBUAT")
+                           || x.accountcodemapping.title.Contains("TEMİZLİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OTO MASRAFLARI")
+                           || x.accountcodemapping.title.Contains("DEMİRBAŞ GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HUKUK DANISMANLIK GİDERİ")
+                           || x.accountcodemapping.title.Contains("DENETİM & SMMM DANIŞMANLIK")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( İTHALAT ve BELGELENDİRME)")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( MARKA )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK GİDERİ-( İTHALAT )")
+                           || x.accountcodemapping.title.Contains("DANIŞMANLIK-( DİĞER )")
+                           || x.accountcodemapping.title.Contains("BİLGİ İŞLEM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("K.K.E.GİDER")
+                           || x.accountcodemapping.title.Contains("DİĞER İDARİ GİDERLER")
+                           || x.accountcodemapping.title.Contains("MUTFAK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("ÜYELİK AİDAT VE ABONELİK GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("OFİS BAKIM ONARIM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ NAKLİYE")
+                           || x.accountcodemapping.title.Contains("DİĞER VERGİ VE HARÇLAR")
+                           || x.accountcodemapping.title.Contains("VERİLEN TEMİNAT KOM.")
+                           || x.accountcodemapping.title.Contains("POS KOMİSYON GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("FAİZ / KAR PAYI GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("İTHALAT TEST VE DENETİM GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("PAZARLAMA  GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("HAVALE")
+                           || x.accountcodemapping.title.Contains("YURTİÇİ SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("YURTDIŞI SEYAHAT GİDERLERİ")
+                           || x.accountcodemapping.title.Contains("TEMSİL VE AĞIRLAMA")
+                           || x.accountcodemapping.title.Contains("BAĞIŞ VE YARDIMLAR")
+                           || x.accountcodemapping.title.Contains("AMORTİSMAN GİDERLERİ")
+                           ).Sum(x => x.tgider.Sum(a => a.toplam)))
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>

@@ -1,0 +1,646 @@
+﻿@model Appuser
+
+@{
+    ViewData["Title"] = "tasklist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "taskQuery";
+
+        var tip;
+        var appuserid =@Model.id;
+        var appuserassignid =@CurrentSession.id;
+
+
+
+        $(function () {
+
+
+            recordtabletaskstatus0 = $('#recordtabletaskstatus0').DataTable({
+                "serverSide": true,
+                "searching": false,
+                "lengthChange": false,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/taskmanagement/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = [appuserid,0];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "title", "visible": false
+                    },
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = " <a class='card btndetail' data-id='"+data+"'>"
+                                + "<div class='card-body text-center'>"
+                                + "<p >" + row.title + "</p></div></a>"
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            recordtabletaskstatus1 = $('#recordtabletaskstatus1').DataTable({
+                "serverSide": true,
+                "searching": false,
+                "lengthChange": false,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/appusers/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                         d.additionalvalues = [appuserid,1];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                   {
+                        "data": "title", "visible": false
+                    },
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = " <a class='card btndetail' data-id='"+data+"'>"
+                                + "<div class='card-body text-center'>"
+                                + "<p >" + row.title + "</p></div></a>"
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            recordtabletaskstatus2 = $('#recordtabletaskstatus2').DataTable({
+                "serverSide": true,
+                "searching": false,
+                "lengthChange": false,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/appusers/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                         d.additionalvalues = [appuserid,2];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                   {
+                        "data": "title", "visible": false
+                    },
+                     {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = " <a class='card btndetail' data-id='"+data+"'>"
+                                + "<div class='card-body text-center'>"
+                                + "<p >" + row.title + "</p></div></a>"
+                            return html;
+                        }
+                    }
+                ]
+
+            });
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+            });
+
+            $(".buttons-print").hide();
+
+            $("#ekle").click(function () {
+
+            $.confirm({
+                    title: 'Görev Ekle',
+                    content: $("#formtemplete").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                    buttons: {
+                        formSubmit: {
+                            text: 'Kayit',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                    $.LoadingOverlay("show");
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/taskmanagement/addtask",
+                                    data: JSON.stringify({
+                                        "title": this.$content.find('#title').val(),
+                                        "information": this.$content.find('#information').val(),
+                                        "startdate": this.$content.find('#startdate').val(),
+                                        "completedate": this.$content.find('#finishdate').val(),
+                                        "appuserid": appuserid,
+                                        "appuserassignid": appuserassignid
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+                                            $.LoadingOverlay("hide");
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtabletaskstatus0.draw();
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+                                });
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+
+                        }
+
+                    },
+                    onContentReady: function () {
+
+                     this.$content.find('#datepicker').datepicker({
+                        format: 'yyyy-mm-dd'
+                     });
+
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+
+            $(".dataTable tbody").on("click", "a.btndetail", function () {
+                var id = $(this).attr("data-id");
+
+                 $.confirm({
+                    title: 'Görev Detay',
+                    content: $("#detailtask").html(),
+                    columnClass: 'col-md-8',
+                    containerFluid: true,
+                     buttons: {
+                        delete: {
+                            text: 'Görevi Sil',
+                            btnClass: 'btn-danger',
+                             action: function () {
+                                $.confirm({
+                                    title: 'Emin misiniz!!',
+                                    content: '',
+                                    autoClose: 'İptal|8000',
+                                    buttons: {
+                                      deleteUser: {
+                                          text: 'Devam Et',
+                                          action: function () {
+                                       
+                                       $.LoadingOverlay("show");
+                                      $.ajax({
+                                          type: "POST",
+                                          url: "/taskmanagement/deletetask",
+                                          data: JSON.stringify({
+                                              "id": id
+                                          }),
+                                          contentType: "application/json; charset=utf-8",
+                                          dataType: "json",
+                                          success: function (msg) {
+                                                  $.LoadingOverlay("hide");
+                                              if (msg.status) {
+                                                  var obj = JSON.parse(msg.jsonObj)
+                                                  $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                                  recordtabletaskstatus0.draw();
+                                                  recordtabletaskstatus1.draw();
+                                                  recordtabletaskstatus2.draw();
+                                            
+                                              } else {
+                                                  $.alert(msg.message);
+                                              }
+                                    
+                                    
+                                    
+                                          }
+                                      });
+
+                            }
+                        },
+                        İptal: function () {
+
+
+                        }
+                    }
+                         });
+
+
+                              
+
+                            }
+                        },
+                        formClose: {
+                            text: 'Kapat',
+                            btnClass: 'btn-blue'
+                        }
+                     },
+                    onOpen: function () {
+
+                        recordtablecomment = $('#recordtablecomment').DataTable({
+                             "serverSide": true,
+                             "searching": false,
+                            "lengthChange": false,
+                           //"jQueryUI": true,
+                            "stateSave": false,
+                            "pagingType": "full_numbers",
+                             "ajax": {
+                             "url": "/taskmanagement/datatables",
+                             "type": "POST",
+                             "contentType": "application/json; charset=utf-8",
+                             "data": function (d) {
+                                  d.additionalvalues = [id];
+                              d.dataqueryname = "commentsQuery";
+
+                                 return JSON.stringify(d);
+                          }
+                },
+                    "columns": [
+
+                    { "data": "username", "visible": false},
+                    { "data": "text", "visible": false},
+                    { "data": "appuserid", "visible": false},
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+
+                            html = "<div class='pl-3 ' >"
+                                + " <a href='#' class='float-left'>  <img style='height:50px;width:50px' alt='Profile Picture' src='https://f0.pngfuel.com/png/442/17/computer-icons-user-profile-male-user-png-clip-art.png' class='img-thumbnail border-0 rounded-circle list-thumbnail align-self-center xsmall'>   </a>"
+                                + "  <div class='pl-3 float-left    '> <a href='#' >"
+                                + "<p class='font-weight-medium mb-0'>" + row.text + " </p>"
+                                + "  <p class='text-muted mb-0 text-small float-left'> " + row.username+ " | 17.09.2018 - 04:45  </p>"
+                                + "  </div>    </a >  </div >"
+                            if (appuserid == row.appuserid) {
+                                var a = "  <a data-id='" + data + "' class='btn btn-sm btn-danger   float-right btnremove'><i class='simple-icon-close'></i></a>";
+                                html = html + a;
+                            }
+
+
+                            return html;
+                        }
+                    }
+                ]
+
+              });
+
+                    },
+                     onContentReady: function () {
+                          var jc = this;
+                          $.ajax({
+                            type: "POST",
+                            url: "/taskmanagement/gettaskbyid",
+                            data: JSON.stringify({
+                                "id": id,
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                              success: function (msg) {
+                                  jc.$content.find('#title').html(msg[0].title)
+                                  jc.$content.find('#information').html(msg[0].information)
+                            }
+                          });
+
+                        jc.$content.find('.btncom').click(function(){
+                                  $.LoadingOverlay("show");
+                                  $.ajax({
+                                    type: "POST",
+                                    url: "/taskmanagement/addCommenttask",
+                                    data: JSON.stringify({
+                                        "text": jc.$content.find('.cominput').val(),
+                                        "taskid":id,
+                                        "appuserid": appuserassignid
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+                                            $.LoadingOverlay("hide");
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtablecomment.draw();
+                                            jc.$content.find('.cominput').val("")
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+
+
+                                });
+                        });
+
+                         jc.$content.find('.btnupdatetaskstatus').click(function () {
+                             var taskstatus = $(this).attr("data-id");
+
+                                  $.LoadingOverlay("show");
+                                  $.ajax({
+                                    type: "POST",
+                                    url: "/taskmanagement/updatetaskstatus",
+                                    data: JSON.stringify({
+                                        "taskstatus": taskstatus,
+                                        "id":id,
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+                                            $.LoadingOverlay("hide");
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+                                            jc.$content.find('.cominput').val("");
+
+                                           recordtabletaskstatus0.draw();
+                                           recordtabletaskstatus1.draw();
+                                            recordtabletaskstatus2.draw();
+                                            jc.close()
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+
+
+                                });
+                         });
+
+
+                         $(".dataTable tbody").on("click", "a.btnremove", function () {
+                             var taskid = $(this).attr("data-id");
+                                   $.ajax({
+                                    type: "POST",
+                                    url: "/taskmanagement/deleteCommenttask",
+                                    data: JSON.stringify({
+                                        "id":taskid
+                                    }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    success: function (msg) {
+                                            $.LoadingOverlay("hide");
+                                        if (msg.status) {
+                                            var obj = JSON.parse(msg.jsonObj)
+                                            $.toast({ title: "İşlem Başarılı", type: 'success', delay: 2000, });
+
+                                            recordtablecomment.draw();
+                                            jc.$content.find('.cominput').val("")
+                                        } else {
+                                            $.alert(msg.message);
+                                        }
+
+
+
+                                    }
+
+
+                                });
+                             console.log(taskid)
+                         });
+
+
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                        });
+                    }
+                });
+
+            });
+
+
+        });
+
+    </script>
+
+
+    <script type="text/template" id="formtemplete">
+        <div class="col-md-12 ">
+            <div class="form-group col-md-12 ">
+                <label>Başlık</label>
+                <input class="form-control" id="title" />
+
+            </div>
+            <div class="form-group col-md-12">
+                <label class=" ">Açıklama</label>
+                <textarea class="form-control" id="information"></textarea>
+            </div>
+            <div class="form-group col-md-12 p-3">
+                <label>İşlem Tarihi</label>
+                <div class="input-daterange input-group" id="datepicker">
+                    <input type="text" class="input-sm form-control" name="start"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           id="startdate"
+                           placeholder="Start" />
+                    <span class="input-group-addon"></span>
+                    <input type="text" class="input-sm form-control" name="end"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           id="finishdate"
+                           placeholder="End" />
+                </div>
+
+            </div>
+
+        </div>
+    </script>
+
+    <script type="text/template" id="detailtask">
+        <div class="col-md-12 ">
+            <div class="form-group col-md-12 text-center">
+                <h3 id="title"></h3>
+
+            </div>
+            <div class="form-group col-md-12 ">
+                <div class="pl-3 pr-3 pt-3 pb-0 flex-grow-1 d-flex align-items-center">
+                    <p class="mb-0 ">
+                        <span id="information"></span>
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+        
+        <div class="form-group col-md-12 ">
+            <h4 class="col-md-12">Durum</h4>
+            <button class="btn btn-warning btnupdatetaskstatus" type="button" data-id="0">Yapılacaklar Ekle</button>
+            <button class="btn btn-warning btnupdatetaskstatus" type="button" data-id="1">Yapılıyor Ekle</button>
+            <button class="btn btn-warning btnupdatetaskstatus" type="button" data-id="2">Tamanla</button>
+        </div>
+        
+        <div class="col-md-12">
+            <h4>Yorum Ekle</h4>
+            <div class="table-responsive">
+                <div class="form-group col-md-12">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control cominput" placeholder="Yorum Yaz" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary btncom" type="button"><i class="simple-icon-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <table id="recordtablecomment" class="table table-sm table-bordered dataTable">
+                    <thead style="display:none">
+                        <tr>
+                            <th>  </th>
+                            <th>  </th>
+                            <th>  </th>
+                            <th>  </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </script>
+
+}
+
+
+<div class=" col-md-12 ">
+
+    <div class="d-flex flex-row justify-content-between mb-3 chat-heading-container">
+        <div class="d-flex flex-row chat-heading">
+            <a class="d-flex" href="#">
+                <img alt="Profile Picture" src="https://f0.pngfuel.com/png/442/17/computer-icons-user-profile-male-user-png-clip-art.png"
+                     class="img-thumbnail border-0 rounded-circle ml-0 mr-4 list-thumbnail align-self-center small">
+            </a>
+            <div class=" d-flex min-width-zero">
+                <div class="card-body pl-0 align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero">
+                    <div class="min-width-zero">
+                        <a href="#">
+                            <p class="list-item-heading mb-1 truncate ">@Model.username </p>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="float-md-right">
+            <button type="button" id="ekle" class="btn btn-primary btn-lg top-right-button mr-1">
+                Yeni  İş Ekle
+            </button>
+        </div>
+    </div>
+
+    
+</div>
+
+<div class="row col-md-12  ">
+    <div class="col-md-4">
+
+        <div class="card">
+
+
+            <div class="card-body">
+                <div class="card-title text-center">
+                    <h5>Yapılacaklar</h5>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table id="recordtabletaskstatus0" class="table table-sm table-bordered">
+                        <thead class="" style="display:none;">
+                            <tr>
+
+                                <th>İsim  </th>
+                                <th> </th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="sortable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title text-center">
+                    <h5>Yapılıyor</h5>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table id="recordtabletaskstatus1" class="table table-sm table-bordered dataTable ">
+                        <thead class="" style="display:none;">
+                            <tr>
+
+                                <th>İsim  </th>
+                                <th> </th>
+
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title text-center">
+                    <h5>Tamamlandı</h5>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table id="recordtabletaskstatus2" class="table table-sm table-bordered dataTable ">
+                        <thead class="" style="display:none;">
+                            <tr>
+
+                                <th>İsim  </th>
+                                <th> </th>
+
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+

@@ -1,0 +1,156 @@
+﻿@model dynamic
+
+
+
+@{
+    ViewData["Title"] = "Stok Maliyet";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+
+
+}
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "stokmaliyetQuery";
+
+
+
+        var tip;
+        var stock = 0;
+        var toplammaliyet = 0;
+        var stockdizi = [];
+        var toplammaliyetdizi = [];
+
+        $(function () {
+            $('#recordtable').DataTable({
+                pageLength: 50,
+                paging: true,
+                searching: true
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnsearch", function () {
+                var text = $(this).attr("data-text");
+                $('input[type=search]').val(text);
+                $('input[type=search]').keyup();
+                if (marka == '' || marka == null) {
+                    $('.filtre_silici').addClass('hidden');
+                }
+            });
+
+
+        });
+
+        /**/</script>
+
+
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Tahsilat Raporu </h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Sipariş Raporlar </a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Tahsilat Raporu  </li>
+        </ol>
+    </nav>
+
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card">
+
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+
+                <div class="card-body">
+
+
+                    <div class="table-responsive">
+
+                        <table id="recordtable" class="table table-sm table-bordered dataTable">
+                            <thead class="thead-light">
+
+                                <tr>
+                                    <th>Kod  </th>
+                                    <th>Ünvan </th>
+                                    <th>Sorumlu  </th>
+                                    <th>GECEN GUN  </th>
+                                    <th>Tutar </th>
+                                    <th>Modül </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                <tr>
+
+                                    <td>
+                                        <a class="btn btn-light btnsearch" data-text="@item.temsilci">@item.temsilci</a>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-light btnsearch" data-text="@item.kod">@item.kod</a>
+
+                                    </td>
+                                    <td>
+
+                                        @item.unvan
+                                    </td>
+                                    <td>
+
+                                        @item.GECEN_GUN
+                                    </td>
+
+                                    <td>
+                                        @string.Format("{0:C0}", item.TUTAR)
+
+                                    </td>
+
+                                    @if (item.MODÜL == "VADE GEÇMİŞ!")
+                                    {
+                                        <td style="background-color: #d03c3c">
+
+                                            @item.MODÜL
+                                        </td>
+
+                                    }
+                                    else
+                                    {
+                                        <td>
+
+                                            @item.MODÜL
+                                        </td>
+                                    }
+
+
+
+
+                                </tr>
+
+                                }
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

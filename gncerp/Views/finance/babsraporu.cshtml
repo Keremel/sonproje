@@ -1,0 +1,205 @@
+﻿
+@model dynamic
+@{
+    ViewData["Title"] = "bayiPerformans";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+
+
+   
+        var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+   
+    
+
+}
+
+@section Scripts{
+
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "bayiPerformansQuery";
+
+
+        var tip;
+
+
+        $(function () {
+
+
+            $("#btnara").click(function () {
+                bastarih = $("#bastarih").val();
+                bistarih = $("#bistarih").val();
+             
+
+                window.location.href = "/finance/babsraporu?bastarih=" + bastarih + "&bistarih=" + bistarih;
+            });
+
+            $('#recordtable').DataTable({
+                "pageLength": 25,
+                "paging": true,
+                "searching": true,
+                "scrollY": true,
+                "sScrollY": '100%'
+            });
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+        });
+
+        /**/</script>
+
+
+}
+
+<style>
+    .scoll {
+        width: 90em;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="col-md-12">
+    <h1>BABS</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Finas Raporlar </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">BABS</li>
+        </ol>
+    </nav>
+
+</div>
+
+
+<div class="row">
+    <div class="col-md-12 ">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="form-row">
+
+
+                    <div class="form-group col-md-4 p-3">
+                        <label>İşlem Tarihi</label>
+                        <div class="input-daterange input-group" id="datepicker">
+                            <input type="text" class="input-sm form-control" name="start"
+                                   value="@firstDayOfMonth.ToString("yyyy-MM-dd")"
+                                   id="bastarih"
+                                   placeholder="Start" />
+                            <span class="input-group-addon"></span>
+                            <input type="text" class="input-sm form-control" name="end"
+                                   value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                   id="bistarih"
+                                   placeholder="End" />
+                        </div>
+
+
+                    </div>
+          
+
+                    <div class="form-group col-md-2 p-3">
+                        <label> Ara</label>
+                        <button class="btn btn-warning form-control" id="btnara"><i class="simple-icon-magic-wand"></i> </button>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card  mb-3">
+
+            <div class="card-body">
+
+                <div class="table-responsive scoll">
+
+                    <table id="recordtable" class="table table-sm  table-bordered" >
+                        <thead>
+                            <tr>
+                                <th>LOGICALREF </th>
+                                <th>INVOICEREF </th>
+                                <th>TCKNO </th>
+                                <th>NAME </th>
+                                <th>SURNAME </th>
+                                <th>DEFINITION_ </th>
+                                <th>ADDR1 </th>
+                                <th>GRPCODE</th>
+                                <th>FICHENO </th>
+                                <th>DATE_ </th>
+                                <th>GROSSTOTAL </th>
+                                <th>SPECODE </th>
+                                <th>CANCELLED </th>
+                                <th>CANCELLED </th>
+                                <th>CANCELLED </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <p>@item.LOGICALREF </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.INVOICEREF </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.TCKNO </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.NAME </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.SURNAME </p>
+                                    </td>  
+                                    <td>
+                                        <p>@item.DEFINITION_ </p>
+                                    </td>
+                               
+                                    <td>
+                                        <p>@item.ADDR1 </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.GRPCODE </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.FICHENO </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.DATE_ </p>
+                                    </td>
+                                    <td>
+                                        <p>@item.TIME_ </p>
+                                    </td> 
+                                    <td>
+                                        <p>@item.GROSSTOTAL </p>
+                                    </td>  
+                                    <td>
+                                        <p>@item.SPECODE </p>
+                                    </td>  
+                                    <td>
+                                        <p>@item.CLIENTREF </p>
+                                    </td>  
+                                    <td>
+                                        <p>@item.CANCELLED </p>
+                                    </td>
+                                </tr>
+
+                            }
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

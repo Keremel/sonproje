@@ -1,0 +1,233 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "gtssiparisQuery";
+
+        $(function () {
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/GTS/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = [$("#Username").val(),1];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "Adi",className: "text-center" },//"visible": false
+                    { "data": "Siparisdate", className: "text-center" },
+                    { "data": "Fiyat" },
+                    { "data": "Temsilci", "visible": false},
+
+                ]
+            });
+
+            recordtable = $('#recordtable1').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/GTS/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+                        d.additionalvalues = [$("#Username").val(),2];
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "Adi",className: "text-center" },//"visible": false
+                    { "data": "Siparisdate", className: "text-center" },
+                    { "data": "Fiyat" },
+                    { "data": "Temsilci", "visible": false},
+
+                ]
+            });
+
+
+          
+
+        });
+
+        $("#exlyuk").click(function () {
+            jq_dialog("Excel Yükle", $("#formexlup").html(),
+                function () { // open
+
+                },
+                function () { //ok
+
+                    loader.start();
+                    var formData = new FormData();
+                    if ($('input[type=file]')[0].files[0] == null) {
+                        $progressBar.width("0%").attr('aria-valuenow', 0).text(0);
+                        jq_alert("Hata oluştu :Dosya seçmeniz gerekiyor ");
+                        return false;
+                    }
+
+                    formData.append('file', $('input[type=file]')[0].files[0]);
+
+                    $.ajax('/helper/exceladdquestion', {
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        xhr: function () {
+                            var xhr = new XMLHttpRequest();
+
+                            xhr.upload.onprogress = function (e) {
+                                var percent = '0';
+                                var percentage = '0%';
+
+                                if (e.lengthComputable) {
+                                    percent = Math.round((e.loaded / e.total) * 100);
+                                    percentage = percent + '%';
+                                    //$progressBar.width(percentage).attr('aria-valuenow', percent).text(percentage);
+                                }
+                            };
+
+                            return xhr;
+                        },
+
+                        success: function (response) {
+                            loader.stop();
+                            if (response.status) {
+                                utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                                recordtable.draw();
+                                $('#confirmmodal').modal("toggle");
+                                return true;
+
+
+
+                            }
+                            else {
+                                jq_alert("Hata oluştu : " + response.message);
+                            }
+
+
+                        },
+
+                        error: function () {
+                            $alert.show().addClass('alert-warning').text('Hata oluştu');
+                        },
+
+                        complete: function () {
+                            //$progress.hide();
+                            return false;
+                        },
+                    });
+                    function geterrortype(pid, mid) {
+                        var reqest = "";
+                        if (pid != 0 && mid != 0) {
+                            reqest = "Atanmış program";
+                        }
+
+
+                        if (pid == 0 && mid == 0) {
+                            reqest = "Atanan kullanıcı ve program bulunamadı";
+                        }
+
+                        if (pid != 0 && mid == 0) {
+                            reqest = "Program bulunamadı";
+                        }
+
+                        if (pid == 0 && mid != 0) {
+                            reqest = "Kullanıcı bulunamadı";
+                        }
+
+                        return reqest;
+                    }
+
+
+                }
+            );
+
+        });
+
+        /**/</script>
+
+    
+
+}
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+   
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        
+            <div class="col-12">
+
+
+                <div class="card">
+                    <div class="card-header" style="margin-top:10px">
+                        <h3>Kurye Sürecinde Olan Siparişler</h3>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Adı</th>
+                                        <th>Tarih</th>
+                                        <th>Fiyat</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+            <div class="col-12" style="margin-top:20px">
+                @if (CurrentSession.Role("satis"))
+                {
+                    <input type="hidden" id="Username" value="@CurrentSession.Username" />
+                }
+
+            <div class="card">
+                <div class="card-header" style="margin-top:10px">
+                    <h3>Tamamlanan Siparişler</h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="recordtable1" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Adı</th>
+                                    <th>Tarih</th>
+                                    <th>Fiyat</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+     
+        </div>
+</div>

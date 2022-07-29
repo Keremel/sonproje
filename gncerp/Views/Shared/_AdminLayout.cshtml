@@ -1,0 +1,448 @@
+﻿
+
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="Gençpa" />
+
+    <meta itemprop="name" content="@ViewData["Title"]" />
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/admin/favicons/favicon-16x16.png" />
+    <title>Gençpa ERP </title>
+    <!-- Custom CSS -->
+    <link href="/admin/assets/libs/flot/css/float-chart.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="/admin/dist/css/style.min.css" rel="stylesheet" />
+    <link href="/admin/dist/stil.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-html5-1.6.1/b-print-1.6.1/datatables.min.css" />
+    @*<link href="/admin/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet" />*@
+    <link href="/admin/assets/libs/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="/admin/assets/libs/toastr/build/toastr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    @*<environment include="Development">
+            <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        </environment>
+        <environment exclude="Development">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
+                  asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+                  asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"
+                  crossorigin="anonymous"
+                  integrity="sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE=" />
+        </environment>*@
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicons/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicons/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicons/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicons/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicons/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicons/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicons/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicons/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+    <link rel="manifest" href="/favicons/manifest.json" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="/favicons/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#ffffff" />
+    @RenderSection("Styles", false)
+    <style type="text/css">
+        .first-level .has-arrow::after {
+            top: 16px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="main-wrapper">
+        <!-- ============================================================== -->
+        <!-- Topbar header - style you can find in pages.scss -->
+        <!-- ============================================================== -->
+        <header class="topbar" data-navbarbg="skin5">
+            <nav class="navbar top-navbar navbar-expand-md navbar-dark">
+                <div class="navbar-header" data-logobg="skin5">
+                    <!-- This is for the sidebar toggle which is visible on mobile only -->
+                    <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)"><i class="ti-menu ti-close"></i></a>
+                    <!-- ============================================================== -->
+                    <!-- Logo -->
+                    <!-- ============================================================== -->
+                    <a class="navbar-brand" href="/">
+                        <!-- Logo icon -->
+                        <b class="logo-icon p-l-10">
+                            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                            <!-- Dark Logo icon -->
+
+                            <img src="/admin/images/logo.png" alt="AdminPanel" style="width:100%" class="light-logo" />
+
+                        </b>
+                        <!--End Logo icon -->
+                        <!-- Logo text -->
+                        <!-- Logo icon -->
+                        <!-- <b class="logo-icon"> -->
+                        <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                        <!-- Dark Logo icon -->
+                        <!-- <img src="assets/images/logo-text.png" alt="homepage" class="light-logo" /> -->
+                        <!-- </b> -->
+                        <!--End Logo icon -->
+                    </a>
+                    <!-- ============================================================== -->
+                    <!-- End Logo -->
+                    <!-- ============================================================== -->
+                    <!-- ============================================================== -->
+                    <!-- Toggle which is visible on mobile only -->
+                    <!-- ============================================================== -->
+                    <a class="topbartoggler d-block d-md-none waves-effect waves-light" href="javascript:void(0)" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i class="ti-more"></i></a>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Logo -->
+                <!-- ============================================================== -->
+                <div class="navbar-collapse collapse" id="navbarSupportedContent" data-navbarbg="skin5">
+                    <!-- ============================================================== -->
+                    <!-- toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-left mr-auto">
+                        <li class="nav-item d-none d-md-block"><a class="nav-link sidebartoggler waves-effect waves-light" href="javascript:void(0)" data-sidebartype="mini-sidebar"><i class="mdi mdi-menu font-24"></i></a></li>
+                        <!-- ============================================================== -->
+                        <!-- create new -->
+                        <!-- ============================================================== -->
+                        @*<%--
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="d-none d-md-block">Create New <i class="fa fa-angle-down"></i></span>
+                                    <span class="d-block d-md-none"><i class="fa fa-plus"></i></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </li>
+                            <!-- ============================================================== -->
+                            <!-- Search -->
+                            <!-- ============================================================== -->
+                            <li class="nav-item search-box">
+                                <a class="nav-link waves-effect waves-dark" href="javascript:void(0)"><i class="ti-search"></i></a>
+                                <form class="app-search position-absolute">
+                                    <input type="text" class="form-control" placeholder="Search &amp; enter">
+                                    <a class="srh-btn"><i class="ti-close"></i></a>
+                                </form>
+                            </li>--%>*@
+                    </ul>
+                    <!-- ============================================================== -->
+                    <!-- Right side toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-right">
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark pro-pic" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="/admin/images/user.png" alt="user" class="rounded-circle" width="31"></a>
+                            <div class="dropdown-menu dropdown-menu-right user-dd animated">
+                                @*<a class="dropdown-item" href="javascript:void(0)"><i class="ti-user m-r-5 m-l-5"></i> My Profile</a>
+                                                                        <a class="dropdown-item" href="javascript:void(0)"><i class="ti-wallet m-r-5 m-l-5"></i> My Balance</a>
+                                    <img src="~/admin/images/user.png" />
+                                                                        <a class="dropdown-item" href="javascript:void(0)"><i class="ti-email m-r-5 m-l-5"></i> Inbox</a>
+                                                                        <div class="dropdown-divider"></div>*@
+
+                                @*<a class="dropdown-item" href="/admin/logout"><i class="fa fa-power-off m-r-5 m-l-5"></i> Çıkış Yap</a>*@
+
+
+
+                            </div>
+                        </li>
+                        <!-- ============================================================== -->
+                        <!-- User profile and search -->
+                        <!-- ============================================================== -->
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!-- ============================================================== -->
+        <!-- End Topbar header -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- Left Sidebar - style you can find in sidebar.scss  -->
+        <!-- ============================================================== -->
+        <aside class="left-sidebar" data-sidebarbg="skin5">
+            <!-- Sidebar scroll-->
+            <div class="scroll-sidebar">
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav">
+                    <ul id="sidebarnav" class="p-t-30">
+
+                        @if (CurrentSession.Role("cari"))
+                        {
+                            <li class="sidebar-item">
+                                <a href="/b2b/Index" class="sidebar-link"><i class="mdi mdi-view-dashboard"></i><span class="hide-menu">Genel Bakış </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/b2b/carihesapekstresi" class="sidebar-link"><i class="mdi mdi-chart-bubble"></i><span class="hide-menu">Cari Hesap Ekstresi  </span></a>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a href="/b2b/satisrf" class="sidebar-link"><i class="mdi mdi-blur-linear"></i><span class="hide-menu">Satış Raporlarım/Faturalarım   </span></a>
+                            </li>
+
+
+
+                            <li class="sidebar-item">
+                                <a href="/b2b/babsformum" class="sidebar-link">
+                                    <i class="mdi mdi-receipt"></i><span class="hide-menu">
+                                        BA/BS Formum
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a href="/b2b/adresdilgilerim" class="sidebar-link"><i class="mdi mdi-account-location"></i><span class="hide-menu">Adres Bilgilerim  </span></a>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a href="/b2b/satisytemsilcim" class="sidebar-link">
+                                    <i class="mdi mdi-account-multiple"></i>
+                                    <span class="hide-menu">
+                                        Satış Temsilcim
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a href="/b2b/Logout" class="sidebar-link">
+                                    <i class="mdi mdi-logout"></i>
+                                    <span class="hide-menu">
+                                        Çıkış
+                                    </span>
+                                </a>
+                            </li>
+
+
+
+                        }
+                        else
+                        {
+
+                            <li class="sidebar-item"><a class="sidebar-link waves-effect waves-dark sidebar-link" href="/Home/Index" aria-expanded="false"><i class="mdi mdi-view-dashboard"></i><span class="hide-menu">Genel Bakış</span></a></li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-calculator"></i><span class="hide-menu">Raporlar </span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+                                    @*<li class="sidebar-item"><a href="/rapor/Index" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Test </span></a></li>*@
+                                    <li class="sidebar-item"><a href="/rapor/gelirgiderraporu?yil=2020&ay=1,2,3,4,5,6" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Gelir Gider Raporu   </span></a></li>
+                                    @*<li class="sidebar-item"><a href="/rapor/exceltorapor" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Gelir Gider Raporu   </span></a></li>*@
+                                    <li class="sidebar-item"><a href="/rapor/karzararraporu" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Kar Zarar  Raporu   </span></a></li>
+
+                                    <li class="sidebar-item"><a href="/rapor/bilanco" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Bilanço Raporu  </span></a></li>
+
+                                    <li class="sidebar-item"><a href="/rapor/butce" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Bütçe </span></a></li>
+
+
+
+                                </ul>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-check"></i><span class="hide-menu">IMEI Sorgulama </span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+
+
+                                    <li class="sidebar-item"><a href="/imeisorgulama/Index" class="sidebar-link"><i class="fa fa-database"></i><span class="hide-menu">Sorgula</span></a></li>
+
+                                </ul>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-shopping-cart"></i><span class="hide-menu">Satış</span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+                                    <li class="sidebar-item"><a href="/satis/siparislistesi" class="sidebar-link"><i class="fa fa-list"></i><span class="hide-menu">Sipariş Listesi</span></a></li>
+                                    <li class="sidebar-item"><a href="/satis/fiyatlistesi" class="sidebar-link"><i class="fa fa-list"></i><span class="hide-menu">Fiyat Listesi</span></a></li>
+
+                                </ul>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-chart-bubble"></i><span class="hide-menu">GRAFİK </span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+                                    <li class="sidebar-item"><a href="/chart/personmonth" class="sidebar-link"><i class="fa fa-users"></i><span class="hide-menu">Kişi / Ay</span></a></li>
+                                    <li class="sidebar-item"><a href="/chart/personday" class="sidebar-link"><i class="fa fa-users"></i><span class="hide-menu">Kişi / Gün</span></a></li>
+                                    <li class="sidebar-item"><a href="/chart/brandmonth" class="sidebar-link"><i class="fa fa-tag"></i><span class="hide-menu">Marka / Ay</span></a></li>
+                                    <li class="sidebar-item"><a href="/chart/brandday" class="sidebar-link"><i class="fa fa-tag"></i><span class="hide-menu">Marka / Gün</span></a></li>
+
+                                </ul>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-chart-bar"></i><span class="hide-menu">Sipariş Raporlar   </span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+                                    <li class="sidebar-item"><a href="/salerapor/stokmaliyet" class="sidebar-link"><i class="fa fa-list"></i><span class="hide-menu">Stok Maliyet  </span></a></li>
+
+                                </ul>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chess-board"></i><span class="hide-menu">Muhasebe Kodlar </span></a>
+                                <ul aria-expanded="false" class="collapse  first-level">
+
+
+
+                                    <li class="sidebar-item"><a href="/accountcode/accountcodelist" class="sidebar-link"><i class="fa fa-list"></i><span class="hide-menu">Kod Listesi</span></a></li>
+                                    <li class="sidebar-item"><a href="/accountcode/accountcodeadd" class="sidebar-link"><i class="fa fa-edit"></i><span class="hide-menu">Kod Ekle</span></a></li>
+
+                                </ul>
+                            </li>
+
+                        }
+
+
+
+
+                    </ul>
+                </nav>
+                <!-- End Sidebar navigation -->
+            </div>
+            <!-- End Sidebar scroll-->
+        </aside>
+        <!-- ============================================================== -->
+        <!-- End Left Sidebar - style you can find in sidebar.scss  -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- Page wrapper  -->
+        <!-- ============================================================== -->
+        <div class="page-wrapper">
+
+            @RenderBody()
+            <footer class="footer text-center">
+                <a href="" target="_blank">
+                    <img src="http://one.com/uploads/domainfiles/one.com/logo.png" alt="" style="height: 10px" />
+                </a>
+            </footer>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+
+    <div class="preloader">
+        <div class="lds-ripple">
+            <div class="lds-pos"></div>
+            <div class="lds-pos"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="alertmodal" role="dialog" style="z-index:2000">
+        <div class="modal-dialog shadow">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default alertmodelclose" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmmodal" role="dialog">
+        <div class="modal-dialog shadow">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default alertmodelclose" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/assets/libs/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="/admin/assets/libs/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/admin/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/admin/assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="/admin/assets/extra-libs/sparkline/sparkline.js"></script>
+    <!--Wave Effects -->
+    <script src="/admin/dist/js/waves.js"></script>
+    <!--Menu sidebar -->
+    <script src="/admin/dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="/admin/dist/js/custom.min.js"></script>
+    <!--This page JavaScript -->
+    <!-- <script src="dist/js/pages/dashboards/dashboard1.js"></script> -->
+    <!-- Charts js Files -->
+    <script src="/admin/assets/libs/flot/excanvas.js"></script>
+    <script src="/admin/assets/libs/flot/jquery.flot.js"></script>
+    <script src="/admin/assets/libs/flot/jquery.flot.pie.js"></script>
+    <script src="/admin/assets/libs/flot/jquery.flot.time.js"></script>
+    <script src="/admin/assets/libs/flot/jquery.flot.stack.js"></script>
+    <script src="/admin/assets/libs/flot/jquery.flot.crosshair.js"></script>
+    <script src="/admin/assets/libs/flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
+
+    <script src="/admin/assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+
+
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.20/b-1.6.1/b-html5-1.6.1/b-print-1.6.1/datatables.min.js"></script>
+    @*<script src="assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.js"></script>*@
+
+    <script src="/admin/assets/libs/moment/min/moment-with-locales.min.js"></script>
+    <script src="/admin/assets/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="/admin/assets/libs/bootstrap-datepicker/dist/locales/bootstrap-datepicker.tr.min.js"></script>
+    <script src="/admin/assets/libs/toastr/build/toastr.min.js"></script>
+    @*<script src="/admin/assets/datatables/datatables.defaults.js"></script>*@
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/admin/dist/scripts.js"></script>
+
+
+
+    @RenderSection("Scripts", required: false)
+    <div class="modal fade picturecropper" id="picturemodal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="max-width:99%; height:70vh; top:0" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary" id="crop">Kes ve Kaydet</button>&nbsp;
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    </div>
+                    <h5 class="modal-title" id="modalLabel">Resmi Kes</h5>
+
+                </div>
+                <div class="modal-body">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <div class="img-container">
+                        <img id="image" alt="" src="/client/img/advance_feature_img.jpg" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="alert picturealert" role="alert"></div>
+</body>
+</html>

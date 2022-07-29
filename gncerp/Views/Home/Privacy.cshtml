@@ -1,0 +1,355 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Use this page to detail your site's privacy policy.</p>
+<script type="text/javascript">
+        $(function () {
+            var _defaulttablename = "siparislistesiQuery";
+            var totalciro = 0;
+            var totaladet = 0;
+            var totalfirma = 0;
+            var totalcesit = 0;
+
+            var gundizi = [['Tarih', 'Ciro', 'Adet', 'Çeşit', 'Firma']];
+
+            var cirodizi = [['Kişi', 'Ciro']];
+            var adetdizi = [['Kişi', 'Adet']];
+            var firmadizi = [['Kişi', 'Firma']];
+            var cesitdizi = [['Kişi', 'Çeşit']];
+
+            var bastarih = $("#bastarih").val();
+            var bistarih = $("#bistarih").val();
+            var markaselect = $("#markaselect").val();
+            var turselect = $("#turselect").val();
+            getdashboardrapor();
+
+
+            $("#btnara").click(function () {
+
+                totalciro = 0;
+                totaladet = 0;
+                totalfirma = 0;
+                totalcesit = 0;
+                cirodizi = [['Kişi', 'Ciro']];
+                adetdizi = [['Kişi', 'Adet']];
+                firmadizi = [['Kişi', 'Firma']];
+                cesitdizi = [['Kişi', 'Çeşit']];
+
+                bastarih = $("#bastarih").val();
+                bistarih = $("#bistarih").val();
+                markaselect = $("#markaselect").val();
+                turselect = $("#turselect").val();
+
+                getdashboardrapor();
+
+            });
+
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+
+            var chart = AmCharts.makeChart("chartdiv", {
+                "language": "en",
+                "type": "serial",
+                "dataLoader": {
+                    "url": "http://192.168.2.124//inc/ajax_list_summary.asp",
+                    "format": "json"
+                },
+                "dataDateFormat": "YYYY-MM-DD",
+                "precision": 0,
+                "valueAxes": [{
+                    "id": "v1",
+                    "title": "Ciro",
+                    "position": "left",
+                    "autoGridCount": false,
+                    "labelFunction": function (value) {
+                        return "" + Math.round(value * 1000) + " ₺";
+                    }
+                }, {
+                    "id": "v2",
+                    "title": "Adet",
+                    "gridAlpha": 0,
+                    "position": "right",
+                    "autoGridCount": false
+                }],
+                "graphs": [{
+                    "id": "g3",
+                    "valueAxis": "v2",
+                    "lineColor": "#e7505a",
+                    "fillColors": "#e7505a",
+                    "fillAlphas": 1,
+                    "type": "column",
+                    "title": "Firma",
+                    "valueField": "firma",
+                    "clustered": false,
+                    "columnWidth": 0.5,
+                    "legendValueText": "[[value]]",
+                    "balloonText": "[[title]]<br /><b style='font-size: 130%'>[[value]]</b>"
+                },{
+                    "id": "g4",
+                    "valueAxis": "v1",
+                    "lineColor": "#62cf73",
+                    "fillColors": "#62cf73",
+                    "fillAlphas": 1,
+                    "type": "column",
+                    "title": "Ciro",
+                    "valueField": "ciro",
+                    "clustered": false,
+                    "columnWidth": 0.3,
+                    "legendValueText": "[[value]] ₺",
+                    "balloonText": "[[title]]<br /><b style='font-size: 130%'>[[value]],000</b> ₺"
+                }, {
+                    "id": "g1",
+                    "valueAxis": "v1",
+                    "bullet": "round",
+                    "bulletBorderAlpha": 1,
+                    "bulletColor": "#FFFFFF",
+                    "bulletSize": 5,
+                    "hideBulletsCount": 50,
+                    "lineThickness": 5,
+                    "lineColor": "#20acd4",
+                    "type": "line",
+                    //"type": "smoothedLine",
+                    "title": "Adet",
+                    "useLineColorForBulletBorder": true,
+                    "valueField": "adet",
+                    "balloonText": "[[title]]<br /><b style='font-size: 130%'>[[value]]</b>"
+                }, {
+                    "id": "g2",
+                    "valueAxis": "v2",
+                    "bullet": "round",
+                    "bulletBorderAlpha": 1,
+                    "bulletColor": "#FFFFFF",
+                    "bulletSize": 5,
+                    "hideBulletsCount": 50,
+                    "lineThickness": 5,
+                    "lineColor": "#8E44AD",
+                    "type": "line",
+                    //"type": "smoothedLine",
+                    "dashLength": 5,
+                    "title": "Çeşit",
+                    "useLineColorForBulletBorder": true,
+                    "valueField": "cesit",
+                    "balloonText": "[[title]]<br /><b style='font-size: 130%'>[[value]]</b>"
+                }],
+                "chartScrollbar": {
+                    "graph": "g1",
+                    "oppositeAxis": false,
+                    "offset": 30,
+                    "scrollbarHeight": 50,
+                    "backgroundAlpha": 0,
+                    "selectedBackgroundAlpha": 0.1,
+                    "selectedBackgroundColor": "#888888",
+                    "graphFillAlpha": 0,
+                    "graphLineAlpha": 0.5,
+                    "selectedGraphFillAlpha": 0,
+                    "selectedGraphLineAlpha": 1,
+                    "autoGridCount": true,
+                    "color": "#AAAAAA"
+                },
+                "chartCursor": {
+                    "pan": true,
+                    "valueLineEnabled": true,
+                    "valueLineBalloonEnabled": true,
+                    "cursorAlpha": 0,
+                    "valueLineAlpha": 0.2
+                },
+                "categoryField": "tarih",
+                "categoryAxis": {
+                    "parseDates": true,
+                    "dashLength": 1,
+                    "minorGridEnabled": true
+                },
+                "legend": {
+                    "useGraphSettings": false,
+                    "position": "bottom"
+                },
+                "balloon": {
+                    "borderThickness": 1,
+                    "shadowAlpha": 0
+                },
+                "export": {
+                    "enabled": true
+                }
+            });
+
+
+
+
+
+
+
+
+
+
+
+            function getdashboardrapor() {
+                $.LoadingOverlay("show");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/getdashboardrapor",
+                    data: JSON.stringify({
+                        "bastarih": bastarih,
+                        "bistarih": bistarih,
+                        "markaselect": markaselect,
+                        "turselect": turselect
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+
+                        for (var i = 0; i < msg.length; i++) {
+                            var item = [];
+                            item.push(msg[i].tarih)
+                            item.push(msg[i].ciro / 1000)
+                            item.push(msg[i].adet)
+                            item.push(msg[i].cesit)
+                            item.push(msg[i].firma)
+                            gundizi.push(item)
+                        }
+                        Chartgoogle();
+                    }
+                });
+            }
+
+            function Chartgoogle() {
+
+                google.charts.load('current', { 'packages': ['corechart'] });
+                google.charts.setOnLoadCallback(drawVisualization);
+
+                function drawVisualization() {
+                    // Some raw data (not necessarily accurate)
+                    var data = google.visualization.arrayToDataTable(gundizi);
+
+                    var options = {
+                        title: 'Monthly Coffee Production by Country',
+                        vAxis: { title: 'Cups' },
+                        hAxis: { title: 'Month' },
+                        seriesType: 'bars',
+                        series: { 3: { type: 'line' }, 2: { type: 'line' } },
+
+                    };
+
+                    var chart = new google.visualization.ComboChart(document.getElementById('chart_div12'));
+                    chart.draw(data, options);
+                }
+
+
+                $.LoadingOverlay("hide");
+
+            }
+
+
+            function getdashboardrapor2() {
+                $.LoadingOverlay("show");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/getdashboardrapor",
+                    data: JSON.stringify({
+                        "bastarih": bastarih,
+                        "bistarih": bistarih,
+                        "markaselect": markaselect,
+                        "turselect": turselect
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (msg) {
+
+                        for (var i = 0; i < msg.length; i++) {
+                            console.log(msg)
+                            tableadd(msg[i].kullanici, msg[i].adet, msg[i].firma, msg[i].cesit, msg[i].ciro);
+
+                            totalciro = totalciro + msg[i].ciro;
+                            totaladet = totaladet + msg[i].adet;
+                            totalfirma = totalfirma + msg[i].firma;
+                            totalcesit = totalcesit + msg[i].cesit;
+                            var itemciro = [];
+                            itemciro.push(msg[i].kullanici)
+                            itemciro.push(msg[i].ciro)
+                            cirodizi.push(itemciro)
+
+                            var itemadet = [];
+                            itemadet.push(msg[i].kullanici)
+                            itemadet.push(msg[i].adet)
+                            adetdizi.push(itemadet)
+
+                            var itemfirma = [];
+                            itemfirma.push(msg[i].kullanici)
+                            itemfirma.push(msg[i].firma)
+                            firmadizi.push(itemfirma)
+
+                            var itemcesit = [];
+                            itemcesit.push(msg[i].kullanici)
+                            itemcesit.push(msg[i].cesit)
+                            cesitdizi.push(itemcesit)
+
+
+
+                        }
+                        Chartgoogle();
+
+                    }
+                });
+            }
+
+
+
+
+            function Chartgoogle2() {
+
+                google.charts.load("current", { packages: ["corechart"] });
+                google.charts.setOnLoadCallback(drawChart);
+                function drawChart() {
+                    var cirodata = google.visualization.arrayToDataTable(cirodizi);
+                    var cirooptions = {
+                        title: 'Kişi Ciro  Toplam Ciro :' + totalciro,
+                        is3D: true,
+                    };
+                    var cirochart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                    cirochart.draw(cirodata, cirooptions);
+
+
+
+
+                    var adetdata = google.visualization.arrayToDataTable(adetdizi);
+                    var adetoptions = {
+                        title: 'Kişi Adet  Toplam Adet :' + totaladet,
+                        is3D: true,
+                    };
+                    var adetchart = new google.visualization.BarChart(document.getElementById('piechart_adet'));
+                    adetchart.draw(adetdata, adetoptions);
+
+
+
+
+                    $.LoadingOverlay("hide");
+
+                }
+
+            }
+
+
+
+
+            function tableadd(kullanici, adet, firma, cesit, ciro) {
+
+                var table = "<tr>"
+                    + " <td> <p>" + kullanici + " </p></td>"
+                    + " <td> <p>" + adet + " </p></td>"
+                    + " <td> <p>" + firma + " </p></td>"
+                    + " <td> <p>" + cesit + " </p></td>"
+                    + " <td> <p>" + ciro + " </p></td>"
+                    + " </tr>";
+                $("#recordtable tbody").append(table);
+
+
+            }
+        })
+</script>

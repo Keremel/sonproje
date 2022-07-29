@@ -1,0 +1,64 @@
+﻿
+@model List<Accountcodemapping>
+
+@{
+    ViewData["Title"] = "accountcodelist";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-md-12 d-flex no-block align-items-center">
+            <h4 class="page-title"> Muhasebe Kodları </h4>
+         
+        </div>
+       
+       
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+     
+        <div class="col-md-12">
+          
+            <div class="card">
+              
+                <div class="card-body">
+                    <div class=" ml-auto text-right">
+                        <a href="/accountcode/accountcodeadd" class="btn  btn-success">Yeni  Ekle</a>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Baslık  </th>
+                                    <th></th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            @item.title
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/accountcode/accountcodeedit/@item.id" class="btn btn-warning">Düzenle</a>
+                                            <a href="/accountcode/accountcodedelete/@item.id" class="btn btn-danger">Sil</a>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

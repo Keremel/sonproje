@@ -1,0 +1,355 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+
+        var recordtable;
+        var _defaulttablename = "bigdataQuery";
+
+
+        $(function () {
+
+            recordtable = $('#recordtable').DataTable({
+                "serverSide": true,
+                //"jQueryUI": true,
+                "stateSave": false,
+                "pagingType": "full_numbers",
+                "ajax": {
+                    "url": "/Bigdata/datatables",
+                    "type": "POST",
+                    "contentType": "application/json; charset=utf-8",
+                    "data": function (d) {
+                        d.dataqueryname = _defaulttablename;
+
+                        return JSON.stringify(d);
+                    }
+                },
+                "columns": [
+                    { "data": "Adi" },
+                    { "data": "Telefon" },
+                    { "data": "Il", className: "text-center" },
+                    { "data": "Musteritipi", className: "text-center" },
+                    { "data": "Atanan", className: "text-center" },
+                    {
+                        "data": "id", className: "text-center", "render": function (data, type, row) {
+                            var html = "<a title='Düzenle' data-toggle='tooltip' data-questiontype='" + row.questiontype + "'  data-id='" + data + "' href='javascript:;' class='btn btn-sm btn-warning btnedit'><i class='fa fa-edit'></i></a>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+
+            $(".dataTable tbody").on("click", "a.btnremove", function () {
+                var id = $(this).attr("data-id");
+
+                jq_dialog("Dikkat", "Silmek istediğinize emin misiniz?",
+                    function () { }, function () {
+                        loader.start();
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/deletebyid",
+                            data: JSON.stringify({ "id": id, "tablename": _tablename }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                loader.stop();
+                                if (response.status) {
+                                    utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla Silindi", "kayit_basarili"));
+
+                                    recordtable.draw();
+
+                                    $('#confirmmodal').modal("toggle");
+                                    return true;
+                                }
+                                else {
+                                    jq_alert(response.message);
+                                }
+                            }
+                        });
+
+                    });
+
+            });
+
+            $(".dataTable tbody").on("click", "a.btnedit", function () {
+                var id = $(this).attr("data-id");
+                var questiontype = $(this).attr("data-questiontype");
+
+                loader.start();
+
+                jq_dialog("Soru Düzenle", $("#formsoru").html(),
+
+                    function () { // open
+                        if (questiontype == 0) {
+                            $("#sorutipload").append($("#formcoktansecmeli").html());
+                        } else {
+                            $("#sorutipload").append($("#formdogruyanlis").html())
+                        }
+
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/getbyid",
+                            data: JSON.stringify({ "id": id, "tablename": _tablename }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                loader.stop();
+                                loadFormFromData(msg[0], _tablename);
+                            }
+                        });
+                    },
+                    function () { //ok
+                        var tableObj = createTableObject(_tablename);
+                        if (tableObj.length == 0 || tableObj == false)
+                            return false;
+
+                        loader.start();
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/generalupdate",
+                            data: JSON.stringify({ "table": tableObj, "id": id, "tablename": _tablename, "methodsAndParams": [] }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                loader.stop();
+                                var jsondata = msg;
+                                if (jsondata.status) {
+                                    utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                                    recordtable.draw();
+
+                                    $('#confirmmodal').modal("toggle");
+                                    return true;
+                                }
+                                else {
+                                    if (jsondata.returnvalue == "-2") {
+                                        utilities.alert(jsondata.message, "ui-icon-alert", "Dikkat", "dikkat");
+                                    }
+                                    else {
+
+                                        jq_alert(utilities.dil_ceviri("Beklenmedik bir hata oluştu", "beklenmedik_hata") + ":" + jsondata.message);
+
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+
+                );
+                $("#questiontype").change(function () {
+                    var $thi = $(this);
+                    if ($thi.val() == "1") {
+                        console.log("1")
+                        $("#sorutipload").html("")
+                        $("#sorutipload").append($("#formdogruyanlis").html())
+
+                    } else {
+                        $("#sorutipload").html("")
+                        $("#sorutipload").append($("#formcoktansecmeli").html())
+                    }
+
+                });
+            });
+
+            $(".btnnew").click(function () {
+                jq_dialog("Yeni Soru", $("#formsoru").html(),
+
+                    function () { // open
+                        $("#sorutipload").append($("#formcoktansecmeli").html())
+
+                    },
+                    function () {// ok
+                        var tableObj = createTableObject(_tablename);
+                        if (tableObj.length == 0 || tableObj == false)
+                            return false;
+
+
+                        loader.start();
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/helper/generalupdate",
+                            data: JSON.stringify({ "table": tableObj, "id": 0, "tablename": _tablename, "methodsAndParams": [] }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (msg) {
+                                loader.stop();
+                                var jsondata = msg;
+                                if (jsondata.status) {
+                                    utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                                    recordtable.draw();
+
+                                    $('#confirmmodal').modal("toggle");
+                                    return true;
+                                }
+                                else {
+                                    if (jsondata.returnvalue == "-2") {
+                                        utilities.alert(jsondata.message, "ui-icon-alert", "Dikkat", "dikkat");
+                                    }
+                                    else {
+                                        jq_alert(utilities.dil_ceviri("Beklenmedik bir hata oluştu", "beklenmedik_hata") + ":" + jsondata.message);
+                                    }
+                                }
+
+                            }
+                        });
+
+
+                    }, "modal-lg");
+
+                $("#questiontype").change(function () {
+                    var $thi = $(this);
+                    if ($thi.val() == "1") {
+                        console.log("1")
+                        $("#sorutipload").html("")
+                        $("#sorutipload").append($("#formdogruyanlis").html())
+
+                    } else {
+                        $("#sorutipload").html("")
+                        $("#sorutipload").append($("#formcoktansecmeli").html())
+                    }
+
+                });
+
+            });
+        });
+
+
+        $("#exlyuk").click(function () {
+            jq_dialog("Excel Yükle", $("#formexlup").html(),
+                function () { // open
+
+                },
+                function () { //ok
+
+                    loader.start();
+                    var formData = new FormData();
+                    if ($('input[type=file]')[0].files[0] == null) {
+                        $progressBar.width("0%").attr('aria-valuenow', 0).text(0);
+                        jq_alert("Hata oluştu :Dosya seçmeniz gerekiyor ");
+                        return false;
+                    }
+
+                    formData.append('file', $('input[type=file]')[0].files[0]);
+
+                    $.ajax('/helper/exceladdquestion', {
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        xhr: function () {
+                            var xhr = new XMLHttpRequest();
+
+                            xhr.upload.onprogress = function (e) {
+                                var percent = '0';
+                                var percentage = '0%';
+
+                                if (e.lengthComputable) {
+                                    percent = Math.round((e.loaded / e.total) * 100);
+                                    percentage = percent + '%';
+                                    //$progressBar.width(percentage).attr('aria-valuenow', percent).text(percentage);
+                                }
+                            };
+
+                            return xhr;
+                        },
+
+                        success: function (response) {
+                            loader.stop();
+                            if (response.status) {
+                                utilities.onscreen(utilities.dil_ceviri("Kayıt başarıyla oluşturuldu", "kayit_basarili"));
+                                recordtable.draw();
+                                $('#confirmmodal').modal("toggle");
+                                return true;
+
+
+
+                            }
+                            else {
+                                jq_alert("Hata oluştu : " + response.message);
+                            }
+
+
+                        },
+
+                        error: function () {
+                            $alert.show().addClass('alert-warning').text('Hata oluştu');
+                        },
+
+                        complete: function () {
+                            //$progress.hide();
+                            return false;
+                        },
+                    });
+                    function geterrortype(pid, mid) {
+                        var reqest = "";
+                        if (pid != 0 && mid != 0) {
+                            reqest = "Atanmış program";
+                        }
+
+
+                        if (pid == 0 && mid == 0) {
+                            reqest = "Atanan kullanıcı ve program bulunamadı";
+                        }
+
+                        if (pid != 0 && mid == 0) {
+                            reqest = "Program bulunamadı";
+                        }
+
+                        if (pid == 0 && mid != 0) {
+                            reqest = "Kullanıcı bulunamadı";
+                        }
+
+                        return reqest;
+                    }
+
+
+                }
+            );
+
+        });
+
+        /**/</script>
+
+    
+
+}
+
+<div class="page-breadcrumb">
+    <div class="row">
+        <div class="col-12 d-flex no-block align-items-center">
+   
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table id="recordtable" class="table table-sm table-striped table-bordered dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Adi</th>
+                                    <th>Telefon</th>
+                                    <th>Il</th>
+                                    <th>Musteritipi</th>
+                                    <th>Atanan</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

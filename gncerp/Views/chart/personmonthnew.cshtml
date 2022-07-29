@@ -1,0 +1,112 @@
+﻿@model List<Personelperformas>
+
+@{
+    ViewData["Title"] = "personmonthnew";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        var recordtable;
+        var _defaulttablename = "appuserQuery";
+
+        var penetrasyon = [@string.Join(",",Model.Select(x => x.penetrasyon).ToList())];
+        var kullanici = ['@string.Join("','",Model.Select(x => x.kullanici).ToList())'];
+        var adet = [@string.Join(",",Model.Select(x => x.adet).ToList())];
+
+
+        var tip;
+
+        $(function () {
+
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+                //startDate: '-3d'
+            });
+
+
+
+        });
+
+        /**/</script>
+
+
+    <script type="text/template" id="formtemplete">
+        <div class="col-md-12 ">
+            <div class="form-group col-md-12 ">
+                <label>İsim</label>
+                <input class="form-control " id="name" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Soyisim</label>
+                <input class="form-control" id="surname" />
+            </div>
+            <div class="form-group col-md-12">
+
+                <label class="">Role</label>
+                <select class="form-control" id="role">
+                    <option>admin</option>
+                    <option>satis</option>
+                    <option>muhasebe</option>
+                    <option>yonetim</option>
+                </select>
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Username</label>
+                <input class="form-control" id="username" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Email</label>
+                <input class="form-control" id="email" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Telefon </label>
+                <input class="form-control" id="tel" />
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Şifre</label>
+                <input class="form-control" id="password" />
+            </div>
+            <div class="form-group col-md-12">
+                <label for="ispsv">Pasif  </label>
+                <input type="checkbox" id="ispsv" />
+            </div>
+
+
+        </div>
+    </script>
+}
+
+
+
+<div class="col-md-12">
+
+    <h1>Kullanıcılar</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Tanımlamalar</a>
+            </li>
+
+            <li class="breadcrumb-item active" aria-current="page">Kullanıcılar </li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+
+        <div class="col-md-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

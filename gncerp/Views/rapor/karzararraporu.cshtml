@@ -1,0 +1,1469 @@
+﻿@model KarzararraporuModel
+
+@{
+    ViewData["Title"] = "karzararraporu";
+    Layout = "~/Views/Shared/_AdminLayoutnew.cshtml";
+    List<string> moonlist = new List<string>();
+
+    foreach (var item in ViewBag.ay.Split(","))
+    {
+        moonlist.Add(item);
+    }
+}
+
+<style>
+    .baslik {
+        width: 150px;
+    }
+
+    .aynu {
+        font-size: 10px;
+        color: black;
+    }
+
+    .toplamnu {
+        font-size: 15px;
+        color: #ff0000;
+        font-weight: bold;
+    }
+
+    .toplamay {
+        font-size: 12px;
+        color: #ff0000;
+        font-weight: bold;
+    }
+</style>
+@section Scripts{
+
+    <script src="~/simple.money.format/simple.money.format.js"></script>
+    <script type="text/javascript">
+
+       var aylist="@ViewBag.ay";
+
+        $(document).ready(function () {
+
+		    $('.money').simpleMoneyFormat();
+
+            $('#budgetbtn').change(function () {
+                if ($(this).is(':checked')) {
+                      $(".budget").show();
+                }
+                else {
+                       $(".budget").hide();
+                }
+
+                 });
+
+
+
+            for (const val of aylist.split(",")) {
+
+                $("#che-"+val+"").prop( "checked", true );
+
+            }
+
+               $("#@ViewBag.yil").attr('checked', true);
+
+               $("#getir").click(function () {
+
+
+                 var yil = $("input[name='yil']:checked").val();
+
+                var cboxval = new Array();
+
+                $.each($("#moons .moon"), function () {
+
+                    var pollid = $(this).attr("data-id");
+
+                  if ($('input[name="che-'+pollid+'"]').is(':checked')){
+                           cboxval.push(pollid);
+                  }
+
+                    window.location.href = "/rapor/karzararraporu?yil=" + yil + "&ay="+cboxval.join(",");
+
+                  })
+
+
+
+                });
+
+
+
+               $("#budgetbtn").click(function () {
+
+            });
+
+        });
+
+
+    </script>
+
+}
+
+<div class="col-12">
+
+    <h1>Kar Zarar Raporu</h1>
+    <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-0">
+            <li class="breadcrumb-item">
+                <a href="#">Raporlar</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#">Genel Raporlar </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Kar Zarar Raporu</li>
+        </ol>
+    </nav>
+    
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+
+
+        <div class="card mb-2">
+            <div class="card-body table-responsive">
+                <div class="form-row">
+
+                    <div class=" col-md-1 form-group">
+                        <label for="2021">2021</label>
+                        <input type="radio" name="yil" value="2021" id="2021" />
+                    </div> 
+                    <div class=" col-md-1 form-group">
+                        <label for="2020">2020</label>
+                        <input type="radio" name="yil" value="2020" id="2020" />
+                    </div>
+                    <div class=" col-md-1 form-group">
+                        <label for="2019">2019</label>
+                        <input type="radio" name="yil" value="2019" id="2019" />
+                    </div>
+                    <div class=" col-md-1 form-group">
+                        <label for="2018">2018</label>
+                        <input type="radio" name="yil" value="2018" id="2018" />
+                    </div>
+              
+                    <div class=" col-md-2 form-group">
+                        <a class="btn btn-warning " id="getir">Getir</a>
+                    </div>
+
+
+                </div>
+                <div id="moons" class="form-row">
+                    @foreach (var item in Helpertype.Aylar)
+                    {
+                        <div class="moon col-md-1 form-group" data-id="@item.Key">
+                            <input id="che-@item.Key" type="checkbox" name="che-@item.Key">
+                            <label for="che-@item.Key"> @item.Value</label>
+
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"># Toplam Gelir </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5> CEP TELEFONU</h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+                                
+
+
+
+                                    @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU") != null)
+                                    {
+                                        <td class="text-center aynu">
+                                            @string.Format("{0:#,0}", Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU").toplam)
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center aynu">
+                                            @string.Format("{0:#,0}", 0)
+
+                                        </td>
+                                    }
+
+
+
+
+                                }
+
+
+
+
+
+
+                                <td class="text-center toplamnu">
+                                    @string.Format("{0:#,0}", Model.tGelir.Where(x => x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+                                </td>
+
+
+                            </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> AKSESUAR </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "AKSESUAR") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tGelir.FirstOrDefault(x => x.ay ==moonlist[i] && x.grupKodu == "AKSESUAR").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tGelir.Where(x => x.grupKodu == "AKSESUAR").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> TABLET </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tGelir.Where(x => x.grupKodu == "TABLET").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> DİĞER ÜRÜN </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tGelir.Where(x => x.grupKodu == "DİĞER ÜRÜN").Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam   </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                          {
+                                    @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                    {
+                                        <td class="text-center toplamay">
+                                            @string.Format("{0:#,0}", Model.tGelir.Where(x => x.ay == moonlist[i]).Sum(x => x.toplam))
+
+
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center toplamay">
+                                            @string.Format("{0:#,0}", 0)
+
+                                        </td>
+                                    }
+
+                                }
+
+
+                                <td class="text-center toplamnu">
+
+
+                                    @string.Format("{0:#,0}", Model.tGelir.Where(x => x.grupKodu == "DİĞER ÜRÜN" || x.grupKodu == "TABLET" || x.grupKodu == "AKSESUAR" || x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+
+                                </td>
+
+                            </tr>
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm table-bordered dataTable no-footer">
+                    <thead>
+                   
+                        <tr>
+                            <th scope="col"># Maliyet </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> CEP TELEFONU</h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU").toplam)
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+                                    </td>
+                                }
+
+
+
+
+                            }
+
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tMaliyet.Where(x => x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+                            </td>
+
+
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> AKSESUAR </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "AKSESUAR") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "AKSESUAR").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tMaliyet.Where(x => x.grupKodu == "AKSESUAR").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> TABLET </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tMaliyet.Where(x => x.grupKodu == "TABLET").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> DİĞER ÜRÜN </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tMaliyet.Where(x => x.grupKodu == "DİĞER ÜRÜN").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam   </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+                                @if (Model.tMaliyet.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                {
+                                    <td class="text-center toplamay">
+                                        @string.Format("{0:#,0}", @Model.tMaliyet.Where(x => x.ay == moonlist[i]).Sum(x => x.toplam))
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center toplamay">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+                            }
+
+
+                            <td class="text-center toplamnu">
+
+
+                                @string.Format("{0:#,0}", Model.tMaliyet.Where(x => x.grupKodu == "DİĞER ÜRÜN" || x.grupKodu == "TABLET" || x.grupKodu == "AKSESUAR" || x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"># Brüt Kar </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <h5 class=""> CEP TELEFONU</h5>
+                            </td>
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "CEP TELEFONU").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tKar.Where(x => x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+                            </td>
+
+
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> AKSESUAR </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+                                @if (Model.tGelir.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "AKSESUAR") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "AKSESUAR").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+                            }
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tKar.Where(x => x.grupKodu == "AKSESUAR").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> TABLET </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "TABLET").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tKar.Where(x => x.grupKodu == "TABLET").Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> DİĞER ÜRÜN </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+
+
+                                @if (Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN") != null)
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", Model.tKar.FirstOrDefault(x => x.ay == moonlist[i] && x.grupKodu == "DİĞER ÜRÜN").toplam)
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center aynu">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+
+
+
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.tKar.Where(x => x.grupKodu == "DİĞER ÜRÜN").Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam   </h5>
+
+                            </td>
+                            @for (int i = 0; i < moonlist.Count ; i++)
+                            {
+                                @if (Model.tKar.FirstOrDefault(x => x.ay == moonlist[i]) != null)
+                                {
+                                    <td class="text-center toplamay">
+                                        @string.Format("{0:#,0}", @Model.tKar.Where(x => x.ay == moonlist[i]).Sum(x => x.toplam))
+
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-center toplamay">
+                                        @string.Format("{0:#,0}", 0)
+
+                                    </td>
+                                }
+
+                            }
+
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.tKar.Where(x => x.grupKodu == "DİĞER ÜRÜN" || x.grupKodu == "TABLET" || x.grupKodu == "AKSESUAR" || x.grupKodu == "CEP TELEFONU").Sum(x => x.toplam))
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"># Diğer gelirler </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5 class="">Fiyat Farkı (CEP TELEFONU)</h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+                                <td class="text-center aynu">
+                                    @string.Format("{0:#,0}", Model.fiyat_farki_gelirleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)) -
+                                   Model.fiyat_farki_giderleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam))
+                                   )
+                                </td>
+                            }
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.fiyat_farki_gelirleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+
+
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Kira Gelirleri </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+                                <td class="text-center aynu" style="        font-size: 00px;
+">
+                                    @string.Format("{0:#,0}", Model.kira_gelirleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.kira_gelirleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5 class=""> Toplam   </h5>
+                            </td>
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+                                <td class="text-center toplamay">
+                                    @string.Format("{0:#,0}",
+                                       Model.diger_gelirler_toplam.FirstOrDefault(x => x.ay == moonlist[i]).toplam
+                                       )
+
+                                </td>
+
+                            }
+
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.diger_gelirler_toplam.Sum(x => x.toplam))
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"># Toplam Brüt Kar </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5>Toplam Brüt Kar  </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center toplamay">
+                                    @string.Format("{0:#,0}",
+                                   Model.toplam_brut_kar.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}",
+                            Model.toplam_brut_kar.Sum(x => x.toplam)
+
+                                )
+
+                            </td>
+                        </tr>
+
+
+
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"> #TOPLAM GİDERLERİ  </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        <tr>
+                            <td class="baslik">
+                                <h5> PERSONEL GİDERLERİ</h5>
+
+                            </td>
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.personel_giderler.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+
+                                @string.Format("{0:#,0}", Model.personel_giderler.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5>     BÜRO SABİT GİDERLERİ</h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.buro_sabit_giderler.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+
+                                @string.Format("{0:#,0}", Model.buro_sabit_giderler.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>    GENEL İDARE GİDERLERİ</h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.genel_idare_giderleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.genel_idare_giderleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>    SATIŞ & DAGITIM GİDERLERİ</h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+                                    @string.Format("{0:#,0}", Model.satis_dagitim_giderleri.Sum(x => x.tgider.Where(b => b.ay ==moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.satis_dagitim_giderleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>BAĞIŞ VE YARDIMLAR </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.bagis_ve_yardimlar.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.bagis_ve_yardimlar.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>AMORTİSMAN GİDERLERİ </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.amortisman_giderleri
+                       .Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.amortisman_giderleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>Toplam</h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center toplamay">
+
+
+                                    @string.Format("{0:#,0}", Model.toplam_giderler.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+
+                                @string.Format("{0:#,0}", Model.toplam_giderler.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
+
+
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"># E- (FÖ) KAR/ZARAR (C-D) </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5> E- (FÖ) KAR/ZARAR (C-D)  </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center toplamay">
+                                    @string.Format("{0:#,0}", Model.kar_zarar.FirstOrDefault(x => x.ay ==moonlist[i]).toplam)
+
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}",
+                            Model.kar_zarar.Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+
+
+                    </tbody>
+                </table>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"> #FİNANSMAN GİDERLERİ  </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5>POS KOMİSYON GELİRLERİ (+) </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.pos_kom_gelirleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.pos_kom_gelirleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5>POS KOMİSYON GİDERLERİ (-) </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.pos_kom_giderleri.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.pos_kom_giderleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>FAİZ / KAR PAYI GİDERLERİ (-) </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.faiz_kar_payi_giderleri.Sum(x => x.tgider.Where(b => b.ay ==  moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+
+                                @string.Format("{0:#,0}", Model.faiz_kar_payi_giderleri.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5>TEMİNAT MEKTUBU MASRAF YANSITMA GELİRİ (+) </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+
+                                    @string.Format("{0:#,0}", Model.teminat_mektubu_masraf_yansitma.Sum(x => x.tgider.Where(b => b.ay == moonlist[i]).Sum(a => a.toplam)))
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.teminat_mektubu_masraf_yansitma.Sum(x => x.tgider.Sum(a => a.toplam)))
+                            </td>
+                        </tr>
+                        <tr>
+                        <tr>
+                            <td class="baslik">
+                                <h5>Toplam </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center toplamay">
+                                    @string.Format("{0:#,0}",
+                                        Model.finasmantoplam.FirstOrDefault(x => x.ay == moonlist[i]).toplam
+                                         )
+
+                                </td>
+                            }
+
+                            <td class="text-center toplamnu">
+
+                                @string.Format("{0:#,0}", Model.finasmantoplam.Sum(x => x.toplam))
+                            </td>
+                        </tr>
+
+
+
+
+                    </tbody>
+                </table>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-body table-responsive">
+
+                <table class="table table-sm  table-bordered dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th scope="col"> GENÇPA Kâr/Zarar   </th>
+                            @foreach (var item in Helpertype.Aylar.Where(x => moonlist.Contains(x.Key.ToString())))
+                            {
+                                <th scope="col">@item.Value</th>
+                            }
+                            <th scope="col">Toplam</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="baslik">
+                                <h5>D- (FS) TOPLAM  GİDERLER </h5>
+
+                            </td>
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+
+                                    @string.Format("{0:#,0}",
+                             Model.big_toplam_gider.FirstOrDefault(x => x.ay == moonlist[i]).toplam
+                               )
+
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}",
+                    Model.big_toplam_gider.Sum(x => x.toplam))
+
+
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td class="baslik">
+                                <h5> G- (VÖ) AYLIK KAR/ZARAR (E-F)  </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i < moonlist.Count; i++)
+                            {
+
+                                <td class="text-center aynu">
+                                    @string.Format("{0:#,0}",
+                                  Model.aylik_kar_zarar.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}",
+                                 Model.aylik_kar_zarar.Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5>VERGİ KARŞILIĞI  </h5>
+
+                            </td>
+
+
+                            @for (int i = 0; i <moonlist.Count; i++)
+                            {
+
+
+                                <td class="text-center aynu">
+                                    @string.Format("{0:#,0}", Model.vergi_karsiligi.FirstOrDefault(x => x.ay == moonlist[i]).toplam)
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.vergi_karsiligi.Sum(x => x.toplam))
+
+
+
+
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5> H- (VS) AYLIK KAR/ZARAR </h5>
+
+                            </td>
+
+
+                            @for (int i =0; i < moonlist.Count; i++)
+                            {
+
+
+                                <td class="text-center aynu">
+                                    @string.Format("{0:#,0}", Model.vs_aylik_kar_zarar.FirstOrDefault(x => x.ay ==moonlist[i]).toplam)
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.vs_aylik_kar_zarar.Sum(x => x.toplam) + Model.aylik_kar_zarar.Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="baslik">
+                                <h5> KUMULATIF KAR/ZARAR </h5>
+
+                            </td>
+
+
+                            @for (int i =0; i < moonlist.Count; i++)
+                            {
+
+
+                                <td class="text-center aynu">
+                                    @string.Format("{0:#,0}", Model.kumulatif_aylik_kar_zarar.FirstOrDefault(x => x.ay ==moonlist[i]).toplam)
+                                </td>
+                            }
+                            <td class="text-center toplamnu">
+                                @string.Format("{0:#,0}", Model.kumulatif_aylik_kar_zarar.Sum(x => x.toplam) + Model.aylik_kar_zarar.Sum(x => x.toplam))
+
+                            </td>
+                        </tr>
+
+
+
+
+                    </tbody>
+                </table>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
